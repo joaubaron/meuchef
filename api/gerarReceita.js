@@ -7,18 +7,13 @@ export default async function handler(req, res) {
   
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
   try {
     const { ingredientes, alternativa = false, tipoPrato = 'comida', quantidadePessoas = 1 } = req.body || {};
-
     if (!ingredientes) return res.status(400).json({ error: 'ingredientes is required' });
-
     const GROQ_KEY = process.env.GROQ_KEY;
     if (!GROQ_KEY) return res.status(500).json({ error: 'Server misconfiguration' });
-
     // PROMPT CORRETO - específico para o formato que o frontend espera
     const prompt = `Você é um chef brasileiro. Gere uma receita em formato JSON válido, sem texto adicional, markdown ou HTML.
-
 O JSON DEVE ter EXATAMENTE estes campos:
 {
   "titulo": "Nome da Receita",
@@ -31,16 +26,21 @@ O JSON DEVE ter EXATAMENTE estes campos:
   "guarnicao": "- Guarnição 1\\n- Guarnição 2",
   "categoria": "${tipoPrato === 'drink' ? 'drink' : 'doce'}"
 }
-
 REGRAS:
 - Use unidades brasileiras (xícaras, colheres, gramas, ml)
 - Ingredientes devem começar com hífen (-)
 - Modo de preparo deve ter passos numerados (1., 2., 3.)
 - Para ${quantidadePessoas} pessoas
 - Responda APENAS o JSON, sem mais nada
-
+REGRA DE FIDELIDADE À RECEITA CLÁSSICA:
+- Quando o usuário pedir um prato/doce com nome próprio conhecido (ex: panacota, brigadeiro, mousse, flan, pudim, tiramisù, etc.), use OBRIGATORIAMENTE os ingredientes e a técnica da receita TRADICIONAL/CLÁSSICA desse prato.
+- É PROIBIDO misturar ingredientes ou técnicas de receitas diferentes (ex: não adicione ovos, farinha ou amido de milho em panacota; não adicione gelatina em pudim; não adicione ovos ou amido em brigadeiro).
+- Se não tiver certeza dos ingredientes corretos de um prato específico, prefira uma versão mais simples e clássica em vez de inventar uma combinação "Frankenstein".
+EXEMPLOS DE RECEITAS CLÁSSICAS (referência obrigatória):
+- Panacota: creme de leite + leite + açúcar + essência de baunilha + gelatina incolor sem sabor. NUNCA inclua ovos, farinha de trigo, amido de milho, manteiga ou leite condensado. O preparo não envolve cozinhar ovos — apenas aquecer o líquido até dissolver o açúcar/gelatina e depois levar à geladeira para firmar.
+- Pudim de leite condensado: leite condensado + leite + ovos + açúcar (para a calda), levado ao forno em banho-maria. NÃO use gelatina.
+- Brigadeiro: leite condensado + chocolate em pó/cacau + manteiga, cozido na panela até soltar do fundo. NÃO use ovos, farinha ou amido.
 Receita baseada em: ${Array.isArray(ingredientes) ? ingredientes.join(', ') : ingredientes}`;
-
     const apiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -60,20 +60,16 @@ Receita baseada em: ${Array.isArray(ingredientes) ? ingredientes.join(', ') : in
         stream: false
       })
     });
-
     if (!apiRes.ok) {
       const txt = await apiRes.text();
       return res.status(502).json({ error: 'Upstream API error', details: txt });
     }
-
     const data = await apiRes.json();
     let content = data?.choices?.[0]?.message?.content ?? null;
-
     // Limpar possíveis marcações markdown
     if (content) {
       content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     }
-
     return res.status(200).json({ content });
     
   } catch (err) {
