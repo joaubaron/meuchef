@@ -114,6 +114,22 @@ QUALIDADE:
 - Técnicas corretas (nacarar, reduzir, flambar)
 - Proporções realistas e testáveis
 - Sempre inclua pelo menos uma dica de chef profissional
+
+FIDELIDADE A RECEITAS CLÁSSICAS:
+- Quando o usuário pedir um prato com nome próprio conhecido, use OBRIGATORIAMENTE os ingredientes e técnica da receita TRADICIONAL desse prato. NUNCA invente combinações.
+- Exemplos obrigatórios:
+  * Panacota: creme de leite + leite + açúcar + baunilha + gelatina incolor. NUNCA inclua ovos, farinha, amido ou leite condensado.
+  * Pudim de leite condensado: leite condensado + leite + ovos + açúcar para calda, forno em banho-maria. NUNCA use gelatina.
+  * Brigadeiro: leite condensado + chocolate em pó + manteiga, cozido na panela. NUNCA use ovos, farinha ou amido.
+  * Mousse de maracujá: suco de maracujá + leite condensado + creme de leite. NUNCA use gelatina ou ovos.
+  * Quiche: massa + ovos + creme de leite + recheio. Sempre leva ovos na base.
+  * Tiramisù: mascarpone + gemas + açúcar + café + biscoito champanhe. NUNCA use gelatina.
+- Se não tiver certeza dos ingredientes corretos de um prato, prefira a versão mais simples e clássica.
+
+RESTRIÇÕES ALIMENTARES — REGRA ABSOLUTA:
+- Se o usuário mencionar qualquer restrição ("sem ovo", "alérgico a", "não como", "sem glúten", "sem lactose", "vegano", "vegetariano", etc.), essa restrição é PROIBIÇÃO TOTAL em todos os campos: ingredientes, modo de preparo, dicas e guarnição.
+- NUNCA inclua o ingrediente restrito nem substitutos que o contenham (ex: maionese contém ovo; manteiga contém lactose).
+- Se a receita clássica contém o ingrediente restrito, adapte para uma versão sem ele ou sugira uma receita alternativa compatível.
 `;
 
 // === GERENCIAMENTO DE ESTADO GLOBAL ===
