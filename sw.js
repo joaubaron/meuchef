@@ -1,4 +1,4 @@
-const CACHE_VERSION = '22.06.2026-0800'; // será substituído automaticamente pelo GitHub Actions
+const CACHE_VERSION = '22.06.2026-0001'; // será substituído automaticamente pelo GitHub Actions
 const CACHE_NAME = `meuchef-${CACHE_VERSION}`;
 
 const urlsToCache = [
@@ -33,7 +33,7 @@ self.addEventListener('fetch', event => {
 
         return fetch(event.request).then(response => {
           // Não cache requisições da API
-          if (event.request.url.includes('api.anthropic.com')) return response;
+          if (event.request.url.includes('api.anthropic.com') || event.request.url.includes('api.groq.com')) return response;
 
           // Cache outros recursos estáticos
           if (response && response.status === 200) {
