@@ -618,7 +618,7 @@ const fetchComRetry = async (url, options, maxTentativas = CONFIG.MAX_RETRIES) =
                 ...options,
                 headers: {
                     ...options.headers,
-                    'Authorization': `Bearer ${getGroqKey()}`,
+                    'Authorization': `Bearer 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`,
                     'Content-Type': 'application/json',
                     'User-Agent': 'MeuChef-App/1.0'
                 },
