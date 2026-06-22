@@ -1,4 +1,4 @@
-const CACHE_VERSION = '22.06.2026-0814'; // será substituído automaticamente pelo GitHub Actions
+const CACHE_VERSION = '22.06.2026-0001'; // será substituído automaticamente pelo GitHub Actions
 const CACHE_NAME = `meuchef-${CACHE_VERSION}`;
 
 const urlsToCache = [
@@ -7,9 +7,7 @@ const urlsToCache = [
   '/meuchef/manifest.json',
   '/meuchef/css/style.css',
   '/meuchef/components/script.js',
-  '/meuchef/components/config.js',
   '/meuchef/imagens/topo.png',
-  '/meuchef/imagens/chefbaron.png',
   '/meuchef/imagens/assbaron.png',
   '/meuchef/imagens/icon-192.png',
   '/meuchef/imagens/icon-512.png' 
@@ -18,9 +16,13 @@ const urlsToCache = [
 // Instalação do Service Worker
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(cache => {
+      return Promise.all(
+        urlsToCache.map(url =>
+          cache.add(url).catch(err => console.warn('Cache skip:', url, err))
+        )
+      );
+    }).then(() => self.skipWaiting())
   );
 });
 
