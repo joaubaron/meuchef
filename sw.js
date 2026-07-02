@@ -1,6 +1,5 @@
-const CACHE_VERSION = '02.07.2026-0813'; // será substituído automaticamente pelo GitHub Actions
+const CACHE_VERSION = '02.07.2026-0819';
 const CACHE_NAME = `meuchef-${CACHE_VERSION}`;
-
 const urlsToCache = [
   '/meuchef/',
   '/meuchef/index.html',
@@ -12,7 +11,6 @@ const urlsToCache = [
   '/meuchef/imagens/icon-192.png',
   '/meuchef/imagens/icon-512.png' 
 ];
-
 // Instalação do Service Worker
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -25,18 +23,19 @@ self.addEventListener('install', event => {
     }).then(() => self.skipWaiting())
   );
 });
-
 // Interceptação de requisições
 self.addEventListener('fetch', event => {
+  // Ignora completamente requisições que não sejam GET (ex: POST para o proxy Groq/Vercel).
+  // O Cache API só suporta GET; tentar cachear POST gera erro.
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
         if (response) return response;
-
         return fetch(event.request).then(response => {
           // Não cache requisições da API
-          if (event.request.url.includes('api.anthropic.com') || event.request.url.includes('api.groq.com')) return response;
-
+          if (event.request.url.includes('api.anthropic.com') || event.request.url.includes('api.groq.com') || event.request.url.includes('vercel.app')) return response;
           // Cache outros recursos estáticos
           if (response && response.status === 200) {
             const responseToCache = response.clone();
@@ -54,7 +53,6 @@ self.addEventListener('fetch', event => {
       })
   );
 });
-
 // Limpeza de caches antigos + ativação imediata
 self.addEventListener('activate', event => {
   event.waitUntil(
