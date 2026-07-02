@@ -63,7 +63,7 @@ const CONFIG = Object.freeze({
     MODAL_AUTO_CLOSE: 3000,
     MAX_TOKENS: 1400,
     // ⚠️ Troque pela URL real do seu projeto Vercel (ex: https://meuchef-proxy.vercel.app/api/groq)
-    GROQ_PROXY_URL: 'https://SEU-PROJETO.vercel.app/api/groq'
+    GROQ_PROXY_URL: 'https://joaubaron-meuchef.vercel.app/api/groq'
 });
 
 const SYSTEM_PROMPT = `Você é um chef brasileiro prático e experiente. 
