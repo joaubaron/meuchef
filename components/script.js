@@ -61,7 +61,9 @@ const CONFIG = Object.freeze({
     RETRY_BASE_DELAY: 1000,
     MAX_RETRIES: 3,
     MODAL_AUTO_CLOSE: 3000,
-    MAX_TOKENS: 1400
+    MAX_TOKENS: 1400,
+    // ⚠️ Troque pela URL real do seu projeto Vercel (ex: https://meuchef-proxy.vercel.app/api/groq)
+    GROQ_PROXY_URL: 'https://SEU-PROJETO.vercel.app/api/groq'
 });
 
 const SYSTEM_PROMPT = `Você é um chef brasileiro prático e experiente. 
@@ -629,14 +631,13 @@ const fetchComRetry = async (url, options, maxTentativas = CONFIG.MAX_RETRIES) =
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), CONFIG.API_TIMEOUT);
 
-            // ✅ MODIFICADO: Use getGroqKey() aqui
+            // Chave da Groq NÃO fica mais no front-end. A chamada vai para o proxy no Vercel,
+            // que injeta o Authorization Bearer usando a variável de ambiente GROQ_API_KEY.
             const response = await fetch(url, {
                 ...options,
                 headers: {
                     ...options.headers,
-                    'Authorization': `Bearer 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`,
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'MeuChef-App/1.0'
+                    'Content-Type': 'application/json'
                 },
                 signal: controller.signal
             });
@@ -759,10 +760,10 @@ async function gerarReceitaComIA(ingredientes, alternativa = false, tipoPrato = 
     const quantidadePessoas = extrairQuantidadePessoas(ingredientes);
     const promptUsuario = construirPromptReceita(ingredientes, quantidadePessoas, tipoPrato, alternativa);
 
-    console.log('Chamando API Groq diretamente...', ingredientes);
+    console.log('Chamando proxy Vercel (Groq)...', ingredientes);
 
     const response = await fetchComRetry(
-        'https://api.groq.com/openai/v1/chat/completions',
+        CONFIG.GROQ_PROXY_URL,
         {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
