@@ -634,7 +634,7 @@ const fetchComRetry = async (url, options, maxTentativas = CONFIG.MAX_RETRIES) =
                 ...options,
                 headers: {
                     ...options.headers,
-                    'Authorization': `Bearer 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`,
+                    'Authorization': `Bearer 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`,
                     'Content-Type': 'application/json',
                     'User-Agent': 'MeuChef-App/1.0'
                 },
