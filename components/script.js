@@ -768,7 +768,7 @@ async function gerarReceitaComIA(ingredientes, alternativa = false, tipoPrato = 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'llama-3.3-70b-versatile',
+                model: 'openai/gpt-oss-120b',
                 temperature: 0.7,
                 max_tokens: CONFIG.MAX_TOKENS,
                 response_format: { type: 'json_object' },
