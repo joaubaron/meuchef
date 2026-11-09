@@ -66,73 +66,17 @@ const CONFIG = Object.freeze({
     GROQ_PROXY_URL: 'https://joaubaron-meuchef.vercel.app/api/groq'
 });
 
-const SYSTEM_PROMPT = `Você é um chef brasileiro prático e experiente. 
+const SYSTEM_PROMPT = `Você é um chef brasileiro prático. Responda SEMPRE em português e APENAS com JSON válido, sem markdown nem texto extra, neste formato (todos os campos são strings; listas separadas por \n):
+{"titulo":"Nome","ingredientes":"- item\n- item","modoDePreparo":"1. passo\n2. passo","tempoDePreparo":"30 minutos","rendimento":"2 porções","dicasDoChef":"- dica","acompanhamento":"- item","guarnicao":"- item","categoria":"almoco"}
+Se o pedido não for sobre comida ou bebida, responda {"erro":"Minha especialidade é criar receitas deliciosas. Me conte que ingredientes você tem!"}.
 
-REGRA ABSOLUTA: SEMPRE responda APENAS em formato JSON válido, sem nenhum texto adicional, markdown ou HTML.
-
-EXEMPLO DE RESPOSTA CORRETA:
-{
-  "titulo": "Nome da Receita",
-  "ingredientes": "- 2 xícaras de ingrediente\\n- 1 colher de sopa de outro",
-  "modoDePreparo": "1. Primeiro passo\\n2. Segundo passo",
-  "tempoDePreparo": "30 minutos",
-  "rendimento": "2 porções",
-  "dicasDoChef": "- Dica útil\\n- Outra dica",
-  "acompanhamento": "- Vinho recomendado",
-  "guarnicao": "- Salada verde",
-  "categoria": "almoco"
-}
-
-COMPORTAMENTO OBRIGATÓRIO:
-- SEMPRE responda em português brasileiro
-- NUNCA saia do contexto de receitas culinárias
-- Se a solicitação não for sobre comida/bebida, responda com JSON: {"erro": "Minha especialidade é criar receitas deliciosas. Me conte que ingredientes você tem!"}
-
-REGRAS DE FORMATAÇÃO JSON:
-- 'titulo': string (máximo 5 palavras, focado em ingredientes principais)
-- 'ingredientes': string com cada item começando com hífen e quebras de linha
-- 'modoDePreparo': string com passos numerados e quebras de linha
-- 'tempoDePreparo': string (ex: "30 minutos")
-- 'rendimento': string (ex: "2 porções")  
-- 'dicasDoChef': string com itens começando com hífen
-- 'acompanhamento': string com itens começando com hífen
-- 'guarnicao': string com itens começando com hífen
-- 'categoria': string (almoco, cafe, doce, etc.) — deve refletir exatamente o tipo de prato descrito na entrada do usuário (ex.: se for sobremesa → "doce"; se for bebida → "drink"; se for almoço ou jantar → "almoco" ou "jantar"); nunca confunda doce ↔ salgado ↔ bebida.
-
-- REGRA ABSOLUTA PARA DRINKS: Quando a categoria for "drink", o campo "acompanhamento" deve conter APENAS sugestões de COMIDA/PETISCOS. É PROIBIDO sugerir outras bebidas como acompanhamento para drinks.
-
-REGRA DE BEBIDAS: 
-- Se o usuário solicitar explicitamente uma bebida, drink, coquetel, caipirinha, suco, ou qualquer preparação líquida para beber, priorize a categoria "drink"
-- Para bebidas, o campo "ingredientes" deve conter apenas ingredientes de preparo de drinks
-- O "modoDePreparo" deve descrever o preparo de bebidas (misturar, bater, coar, servir com gelo, etc.)
-- Use medidas apropriadas para drinks: ml, doses, colheres para drinks
-
-QUALIDADE:
-- Receitas práticas e executáveis
-- Ingredientes comuns no Brasil
-- Use APENAS unidades brasileiras (g, ml, colheres, xícaras)
-- É proibido usar unidades estrangeiras como "cup", "tablespoon", "teaspoon" ou similares. 
-  Use apenas "xícaras", "colheres", "gramas", "ml", etc.
-- Técnicas corretas (nacarar, reduzir, flambar)
-- Proporções realistas e testáveis
-- Sempre inclua pelo menos uma dica de chef profissional
-
-FIDELIDADE A RECEITAS CLÁSSICAS:
-- Quando o usuário pedir um prato com nome próprio conhecido, use OBRIGATORIAMENTE os ingredientes e técnica da receita TRADICIONAL desse prato. NUNCA invente combinações.
-- Exemplos obrigatórios:
-  * Panacota: creme de leite + leite + açúcar + baunilha + gelatina incolor. NUNCA inclua ovos, farinha, amido ou leite condensado.
-  * Pudim de leite condensado: leite condensado + leite + ovos + açúcar para calda, forno em banho-maria. NUNCA use gelatina.
-  * Brigadeiro: leite condensado + chocolate em pó + manteiga, cozido na panela. NUNCA use ovos, farinha ou amido.
-  * Mousse de maracujá: suco de maracujá + leite condensado + creme de leite. NUNCA use gelatina ou ovos.
-  * Quiche: massa + ovos + creme de leite + recheio. Sempre leva ovos na base.
-  * Tiramisù: mascarpone + gemas + açúcar + café + biscoito champanhe. NUNCA use gelatina.
-- Se não tiver certeza dos ingredientes corretos de um prato, prefira a versão mais simples e clássica.
-
-RESTRIÇÕES ALIMENTARES — REGRA ABSOLUTA:
-- Se o usuário mencionar qualquer restrição ("sem ovo", "alérgico a", "não como", "sem glúten", "sem lactose", "vegano", "vegetariano", etc.), essa restrição é PROIBIÇÃO TOTAL em todos os campos: ingredientes, modo de preparo, dicas e guarnição.
-- NUNCA inclua o ingrediente restrito nem substitutos que o contenham (ex: maionese contém ovo; manteiga contém lactose).
-- Se a receita clássica contém o ingrediente restrito, adapte para uma versão sem ele ou sugira uma receita alternativa compatível.
-`;
+Regras:
+- categoria: almoco, cafe, jantar, lanche, doce, drink, especial, petiscos, restricoes ou diversos; deve refletir o tipo do pedido (nunca confunda doce, salgado e bebida).
+- Receitas práticas, ingredientes comuns no Brasil, unidades brasileiras (g, ml, colheres, xícaras); nunca cup, tablespoon ou teaspoon.
+- Pratos clássicos (panacota, pudim, brigadeiro, mousse de maracujá, quiche, tiramisù...) seguem os ingredientes e a técnica tradicionais. Nunca invente combinações; na dúvida, a versão mais simples.
+- Drinks: ingredientes e preparo de bebida (ml, doses); o acompanhamento são só petiscos/comidas, nunca bebidas.
+- Restrições citadas (sem ovo, sem lactose, alergias, vegano etc.) são proibição total em todos os campos, inclusive derivados (maionese tem ovo; manteiga tem lactose). Se o prato clássico leva o ingrediente, adapte.
+- Inclua ao menos uma dica de chef profissional.`;
 
 // === GERENCIAMENTO DE ESTADO GLOBAL ===
 const AppState = {
@@ -653,11 +597,14 @@ const fetchComRetry = async (url, options, maxTentativas = CONFIG.MAX_RETRIES) =
             }
 
             return response;
-        } catch (error) {
+       } catch (error) {
             console.error(`Tentativa ${tentativa} falhou:`, error);
             if (error.naoRepetir || tentativa === maxTentativas) throw error;
 
-            const delay = Math.pow(2, tentativa) * CONFIG.RETRY_BASE_DELAY;
+            let delay = Math.pow(2, tentativa) * CONFIG.RETRY_BASE_DELAY;
+            const m = String(error.message).match(/try again in ([\d.]+)s/i);
+            if (m) delay = Math.ceil(parseFloat(m[1]) * 1000) + 500;   // espera o que a Groq pediu
+            if (delay > 15000) throw error;                              // não faz o usuário esperar demais
             console.log(`Aguardando ${delay}ms antes da próxima tentativa...`);
             await new Promise(resolve => setTimeout(resolve, delay));
         }
@@ -665,98 +612,27 @@ const fetchComRetry = async (url, options, maxTentativas = CONFIG.MAX_RETRIES) =
 };
 
 const construirPromptReceita = (ingredientes, quantidadePessoas, tipoPrato, alternativa = false) => {
-    // Garantir que tipoPrato seja uma string
     tipoPrato = String(tipoPrato || "comida");
 
-    // === Detecção mais agressiva de bebidas ===
-    const palavrasBebida = [
-        "bebida", "drink", "coquetel", "caipirinha", "suco", "vitamina", 
-        "batida", "cachaça", "vodka", "gin", "rum", "tequila", "cerveja", "vinho"
-    ];
-    
-    const entradaMinuscula = ingredientes.toLowerCase();
-    const isExplicitamenteBebida = palavrasBebida.some(palavra => entradaMinuscula.includes(palavra));
-    
-    // Se for explicitamente bebida, força a categoria drink
-    if (isExplicitamenteBebida) {
-        tipoPrato = "drink";
-    }
+    const palavrasBebida = ["bebida", "drink", "coquetel", "caipirinha", "suco", "vitamina",
+        "batida", "cachaça", "vodka", "gin", "rum", "tequila", "cerveja", "vinho"];
+    if (palavrasBebida.some(p => ingredientes.toLowerCase().includes(p))) tipoPrato = "drink";
 
-    // === Sugestões de acompanhamento ===
-const sugestaoAcompanhamento = () => {
-    // SE FOR DRINK, SUGERIR COMIDA QUE COMBINE
-    if (tipoPrato.toLowerCase() === "drink") {
-        return `- Petiscos salgados que contrastem com o sabor do drink<br>- Comidas leves que não sobrecarreguem o paladar<br>- Aperitivos que combinem com o perfil de sabor da bebida`;
-    }
-    
-    // PARA SOBREMESAS, SUGERIR BEBIDAS QUE COMBINEM
-    if (tipoPrato.toLowerCase() === "sobremesa" || tipoPrato.toLowerCase() === "doce") {
-        return `- Café expresso ou cappuccino<br>- Licor doce ou vinho de sobremesa<br>- Chá de ervas`;
-    }
-    
-    // PARA COMIDAS SALGADAS, MANTER SUGESTÕES DE BEBIDAS
-    switch (tipoPrato.toLowerCase()) {
-        case "sanduíche":
-            return `- Suco natural refrescante<br>- Cerveja leve ou refrigerante<br>`;
-        case "comida":
-        default:
-            return `- Taça de vinho (tinto ou branco, dependendo do prato)<br>- Coquetel leve ou suco natural<br>- Cerveja leve<br>`;
-    }
-};
+    const rendimento = quantidadePessoas === 1 ? "1 porção" : `${quantidadePessoas} porções`;
 
-    const regrasGerais = `
-Você é um chef brasileiro prático e experiente, ...
-<strong>🍹 Acompanhamento</strong><br> - Use sugestões adequadas ao tipo de prato (${tipoPrato})<br><br>
-<strong>🥗 Guarnição</strong><br> - Priorize algo leve e refrescante que combina perfeitamente com o prato<br><br>
+    return `Pedido: "${ingredientes}"
+Tipo de prato: ${tipoPrato}
+${alternativa
+    ? 'Gere APENAS uma VARIAÇÃO do prato (pequenas trocas de tempero/técnica ou 1-2 ingredientes compatíveis), sem mudar o tipo principal.'
+    : 'Gere uma receita.'}
 
-- REGRAS STRINGENTES PARA ACOMPANHAMENTO E GUARNIÇÃO:
-  * O campo "acompanhamento" deve listar apenas bebidas e acompanhamentos coerentes com os ingredientes e tipo de prato. 
-    Não sugira sobremesa como acompanhamento de prato salgado.
-    
-  * ⚠️ REGRA ESPECIAL PARA DRINKS: Quando a categoria for "drink", o campo "acompanhamento" deve sugerir COMIDAS/PETISCOS que combinem com a bebida. **NUNCA** sugerir outras bebidas como acompanhamento para drinks.
-  A sugestão deve considerar o sabor específico do drink (ex: drinks cítricos → petiscos mais neutros; drinks doces → aperitivos salgados).
-    
-  * Para pratos salgados (almoco, jantar, lanche, petiscos): o campo "acompanhamento" deve sugerir BEBIDAS que combinem.
-    Se o prato contém peixe/frutos do mar, priorize vinho branco/rosé; se contém carne vermelha, priorize vinho tinto; 
-    pratos leves/vegetarianos devem ter sugestões mais leves (suco, vinho branco leve, cerveja clara).
-    
-  * Para doces/sobremesas: o campo "acompanhamento" deve sugerir BEBIDAS que combinem com sobremesas (café, chá, licor, vinho doce).
-  
-  * Se houver restrição (ex: "sem lactose", "vegano"), respeite-a estritamente.
-  
-  * ⚠️ Se a entrada mencionar crianças, infantil, saudável, detox, sem álcool, suco ou vitamina, o campo "acompanhamento" NÃO pode conter bebidas alcoólicas. 
-    Nesses casos, sugira apenas sucos, vitaminas, água aromatizada ou opções não alcoólicas.
-    
-  * O campo "guarnicao" deve preferencialmente usar ingredientes já presentes na lista ou substitutos óbvios e compatíveis.
-    Não invente guarnições incompatíveis com as restrições informadas.
-
-- REGRAS PARA VARIAÇÕES (quando 'alternativa' == true):
-  * Gere APENAS uma VARIAÇÃO do prato: pequenas trocas de tempero/técnica, troca/adição de 1 ou 2 ingredientes compatíveis,
-    ou ajuste de preparo; **NÃO** mude o tipo principal de prato (ex.: prato salgado → sobremesa).
-  * Mantenha a coerência entre título, ingredientes, acompanhamento e guarnição.
-
-REGRAS IMPORTANTES:
-- Títulos: nomes de pratos condizentes com os ingredientes, máximo 5 palavras, sem adjetivos, apelos românticos ou poéticos. (ex: Mousse de Maracujá, Arroz Cremoso de Camarão).
-- Ingredientes: comuns no Brasil, usar todas as fornecidas pelo usuário.
-- Modo de preparo: técnicas corretas (nacarar, reduzir, flambar, macerar), passos claros.
-- Quantidades ajustadas para ${quantidadePessoas} pessoas, unidades brasileiras.
-- Sempre incluir pelo menos um segredo de chef.
-- ⭐ Em "Dicas do Chef", quando citar vinho, refira-se sempre ao **vinho usado no preparo** (molho, risoto, marinada, etc.), indicando pelo menos 1 tipo ou rótulo real.
-- As "Dicas do Chef" DEVEM estar diretamente relacionadas ao prato gerado, seus ingredientes e técnicas. Nunca sugira dicas que envolvam outros pratos ou ingredientes não usados.
-- 🍹 Em "Acompanhamento": 
-  * Para pratos salgados (almoco, jantar, lanche, petiscos): sugira bebidas para beber junto com o prato (vinhos, cervejas, sucos, etc.)
-  * Para drinks: sugira COMIDAS/PETISCOS que combinem com a bebida. **NUNCA** sugira outras bebidas como acompanhamento para drinks.
-  * Para doces/sobremesas: sugira bebidas que combinem com sobremesas (café, chá, licor, vinho doce)
-- 🧺 Em "Rendimento", SEMPRE use exatamente o valor de ${quantidadePessoas}. 
-  Se for 1, escreva "1 porção". 
-  Se for maior que 1, escreva "${quantidadePessoas} porções". 
-  Não altere este valor por tradição, contexto ou proporção da receita. 
-  Esta regra é obrigatória e não pode ser ignorada.
-`;
-
-    return alternativa ?
-        `${regrasGerais}\nPor favor, gere APENAS uma VARIAÇÃO do prato similar, mas estritamente baseada em: "${ingredientes}".\n- Retorne APENAS JSON válido, sem texto adicional.\n- Ajuste quantidades para ${quantidadePessoas} pessoas.\n` :
-        `${regrasGerais}\nPor favor, gere uma receita com base em: "${ingredientes}".\n- Retorne APENAS JSON válido, sem texto adicional.\n- Use unidades brasileiras e quantidades para ${quantidadePessoas} pessoas.\n- No campo rendimento, use exatamente "${quantidadePessoas == 1 ? "1 porção" : quantidadePessoas + " porções"}".\n`;
+Regras:
+- Título com até 5 palavras, condizente com os ingredientes, sem adjetivos poéticos.
+- Use todos os ingredientes informados. Quantidades para ${quantidadePessoas} pessoas. Rendimento exatamente "${rendimento}".
+- TODOS os campos do JSON são STRINGS. Listas são uma string com itens separados por \n, nunca arrays.
+- Acompanhamento: prato salgado → bebidas que combinem; doce → café, chá, licor ou vinho doce; drink → apenas petiscos/comidas, nunca bebidas. Sem álcool se o pedido citar crianças, infantil, detox, sem álcool, suco ou vitamina.
+- Dicas do Chef ligadas ao prato; se citar vinho, é o usado no preparo.
+- Guarnição leve, compatível com os ingredientes e restrições.`;
 };
 
 async function gerarReceitaComIA(ingredientes, alternativa = false, tipoPrato = "comida") {
