@@ -1,4 +1,4 @@
-const CACHE_VERSION = '09.11.2026-1257';
+const CACHE_VERSION = '09.11.2026-1303';
 const CACHE_NAME = `meuchef-${CACHE_VERSION}`;
 const urlsToCache = [
   '/meuchef/',
