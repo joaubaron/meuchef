@@ -640,21 +640,24 @@ async function gerarReceitaComIA(ingredientes, alternativa = false, tipoPrato = 
 
     console.log('Chamando proxy Vercel (Groq)...', ingredientes);
 
-const response = await fetchWithRetry(
-    CONFIG.GROQ_PROXY_URL,
-    {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            model: 'gemini-3.8-flash',
-            max_tokens: CONFIG.MAX_TOKENS,
-            messages: [
-                { role: 'system', content: SYSTEM_PROMPT },
-                { role: 'user', content: promptUsuario }
-            ]
-        })
-    }
-);
+    const response = await fetchComRetry(
+        CONFIG.GROQ_PROXY_URL,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'openai/gpt-oss-120b',
+                temperature: 0.7,
+                max_tokens: CONFIG.MAX_TOKENS,
+                reasoning_effort: 'low',
+                response_format: { type: 'json_object' },
+                messages: [
+                    { role: 'system', content: SYSTEM_PROMPT },
+                    { role: 'user', content: promptUsuario }
+                ]
+            })
+        }
+    );
 
     const data = await response.json();
     const content = data?.choices?.[0]?.message?.content;
