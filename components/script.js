@@ -61,7 +61,7 @@ const CONFIG = Object.freeze({
     RETRY_BASE_DELAY: 1000,
     MAX_RETRIES: 3,
     MODAL_AUTO_CLOSE: 3000,
-    MAX_TOKENS: 1400,
+    MAX_TOKENS: 4000,
     // ⚠️ Troque pela URL real do seu projeto Vercel (ex: https://meuchef-proxy.vercel.app/api/groq)
     GROQ_PROXY_URL: 'https://joaubaron-meuchef.vercel.app/api/groq'
 });
@@ -646,13 +646,16 @@ const fetchComRetry = async (url, options, maxTentativas = CONFIG.MAX_RETRIES) =
 
             if (!response.ok) {
                 const erroDetalhado = await response.text();
-                throw new Error(`HTTP ${response.status}: ${response.statusText}. Detalhes: ${erroDetalhado}`);
+                const erroHttp = new Error(`HTTP ${response.status}: ${response.statusText}. Detalhes: ${erroDetalhado}`);
+                // 400 = pedido recusado pela API; repetir o mesmo pedido não adianta
+                if (response.status === 400) erroHttp.naoRepetir = true;
+                throw erroHttp;
             }
 
             return response;
         } catch (error) {
             console.error(`Tentativa ${tentativa} falhou:`, error);
-            if (tentativa === maxTentativas) throw error;
+            if (error.naoRepetir || tentativa === maxTentativas) throw error;
 
             const delay = Math.pow(2, tentativa) * CONFIG.RETRY_BASE_DELAY;
             console.log(`Aguardando ${delay}ms antes da próxima tentativa...`);
@@ -771,6 +774,7 @@ async function gerarReceitaComIA(ingredientes, alternativa = false, tipoPrato = 
                 model: 'openai/gpt-oss-120b',
                 temperature: 0.7,
                 max_tokens: CONFIG.MAX_TOKENS,
+                reasoning_effort: 'low',
                 response_format: { type: 'json_object' },
                 messages: [
                     { role: 'system', content: SYSTEM_PROMPT },
@@ -899,6 +903,12 @@ function showCustomModal(message) {
 function getErrorMessage(error) {
     if (error.message.includes('rate_limit_exceeded') || (error.message.includes('HTTP 429') && error.message.includes('Rate limit reached'))) {
         return "🔥 Cozinha pegando fogo! Tente de novo em alguns segundos.";
+    }
+    if (error.message.includes('HTTP 400')) {
+        return "🍳 O chef se enrolou nessa receita. Tente de novo ou mude um pouco o pedido.";
+    }
+    if (/HTTP (502|503|504)/.test(error.message)) {
+        return "🍳 Nosso chef está ocupado! Tente novamente em alguns segundos.";
     }
     if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
         return "🌐 Problema de conectividade. Verifique sua internet e tente novamente.";
