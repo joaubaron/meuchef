@@ -2044,3 +2044,46 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Simulador de pull-to-refresh para PWA instalado
+let touchStartY = 0;
+let touchCurrentY = 0;
+const PULL_THRESHOLD = 100; // Distância em pixels para disparar
+
+document.addEventListener('touchstart', (e) => {
+    // Só ativa se estiver no topo da página
+    if (window.scrollY === 0) {
+        touchStartY = e.touches[0].clientY;
+    } else {
+        touchStartY = 0;
+    }
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+    if (touchStartY === 0) return;
+    
+    touchCurrentY = e.touches[0].clientY;
+    const pullDistance = touchCurrentY - touchStartY;
+
+    // Se puxar para baixo o suficiente, mostra feedback visual (opcional)
+    if (pullDistance > 0) {
+        // Você pode adicionar um indicador visual aqui se quiser
+        // Ex: document.body.style.transform = `translateY(${pullDistance / 2}px)`;
+    }
+}, { passive: true });
+
+document.addEventListener('touchend', () => {
+    if (touchStartY === 0) return;
+    
+    const pullDistance = touchCurrentY - touchStartY;
+
+    if (pullDistance > PULL_THRESHOLD && window.scrollY === 0) {
+        // Força a atualização limpando o cache (opcional) ou só recarregando
+        window.location.reload(true);
+    }
+
+    // Reseta
+    touchStartY = 0;
+    touchCurrentY = 0;
+    // document.body.style.transform = ''; // Se usou feedback visual
+});
