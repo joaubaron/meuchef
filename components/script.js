@@ -295,13 +295,12 @@ class RecipeFormatter {
         `;
     }
 
-            static createRecipeBox(textoFormatado) {
+        static createRecipeBox(textoFormatado) {
         const titulo = extrairTitulo(textoFormatado);
         const textoHtmlEscapado = escapeHtml(textoFormatado);
         
-        // Busca uma foto real no Unsplash baseada no título da receita
-        const termoBusca = encodeURIComponent(titulo);
-        const urlImagem = `https://source.unsplash.com/featured/600x400/?food,${termoBusca}`;
+        // Foto fixa de comida (estável e real)
+        const urlImagem = 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=600';
 
         return `
             <div class="recipe-box">
@@ -310,9 +309,8 @@ class RecipeFormatter {
                     <button onclick="salvarFavoritoComCategoria()" class="btn-compartilhar">❤️ Salvar</button>
                 </div>
                 
-                <!-- FOTO DA RECEITA AQUI (Unsplash) -->
                 <div style="text-align: center; margin-bottom: 15px;">
-                    <img src="${urlImagem}" alt="Foto de ${escapeHtml(titulo)}" style="width: 100%; max-width: 100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" loading="lazy">
+                    <img src="${urlImagem}" alt="Foto de ${escapeHtml(titulo)}" style="width: 100%; max-width: 100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                 </div>
 
                 <div class="recipe-output">
