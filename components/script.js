@@ -295,9 +295,13 @@ class RecipeFormatter {
         `;
     }
 
-    static createRecipeBox(textoFormatado) {
+        static createRecipeBox(textoFormatado) {
         const titulo = extrairTitulo(textoFormatado);
         const textoHtmlEscapado = escapeHtml(textoFormatado);
+        
+        // Gera a URL da imagem com base no título da receita
+        const promptImagem = encodeURIComponent(`Prato de comida: ${titulo}, fotorrealista, alta qualidade, fundo limpo`);
+        const urlImagem = `https://image.pollinations.ai/prompt/${promptImagem}?width=400&height=300&nologo=true`;
 
         return `
             <div class="recipe-box">
@@ -305,6 +309,12 @@ class RecipeFormatter {
                     <button onclick="compartilharReceita('${escapeHtml(titulo)}', \`${textoHtmlEscapado}\`)" class="btn-compartilhar">🔗 Compartilhar</button>
                     <button onclick="salvarFavoritoComCategoria()" class="btn-compartilhar">❤️ Salvar</button>
                 </div>
+                
+                <!-- FOTO DA RECEITA AQUI -->
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <img src="${urlImagem}" alt="Foto de ${escapeHtml(titulo)}" style="width: 100%; max-width: 400px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" loading="lazy">
+                </div>
+
                 <div class="recipe-output">
                     ${textoFormatado}
                     <div class="bom-apetite">
