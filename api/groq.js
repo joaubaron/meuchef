@@ -1,5 +1,5 @@
 // api/groq.js — Vercel Serverless Function
-// A chave do Gemini mora SÓ aqui, como variável de ambiente (GEMINI_API_KEY),
+// A chave da Groq mora SÓ aqui, como variável de ambiente (GROQ_API_KEY),
 // e nunca vai para o navegador do usuário.
 
 export default async function handler(req, res) {
@@ -17,12 +17,10 @@ export default async function handler(req, res) {
     }
 
     try {
-        // MUDANÇA 1: URL do Google
-        const groqResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
+        const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
-                // MUDANÇA 2: Chave do Google
-                'Authorization': `Bearer ${process.env.GEMINI_API_KEY}`,
+                'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(req.body)
@@ -31,7 +29,7 @@ export default async function handler(req, res) {
         const data = await groqResponse.json();
         return res.status(groqResponse.status).json(data);
     } catch (error) {
-        console.error('Erro no proxy Gemini:', error);
-        return res.status(500).json({ erro: 'Falha ao chamar a API do Gemini' });
+        console.error('Erro no proxy Groq:', error);
+        return res.status(500).json({ erro: 'Falha ao chamar a API da Groq' });
     }
 }
