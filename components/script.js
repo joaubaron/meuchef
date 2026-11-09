@@ -62,7 +62,7 @@ const CONFIG = Object.freeze({
     MAX_RETRIES: 3,
     MODAL_AUTO_CLOSE: 3000,
     MAX_TOKENS: 4000,
-    GROQ_PROXY_URL: 'https://meuchef.vercel.app/api/groq'
+    GROQ_PROXY_URL: 'https://meuchef-theta.vercel.app/api/groq'
 });
 
 const SYSTEM_PROMPT = `Você é um chef brasileiro prático. Responda SEMPRE em português e APENAS com JSON válido, sem markdown nem texto extra, neste formato (todos os campos são strings; listas separadas por \n):
