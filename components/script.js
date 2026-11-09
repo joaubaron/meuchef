@@ -66,11 +66,12 @@ GROQ_PROXY_URL: 'https://meuchef-theta.vercel.app/api/groq'
 });
 
 const SYSTEM_PROMPT = `Você é um chef brasileiro prático. Responda SEMPRE em português e APENAS com JSON válido, sem markdown nem texto extra, neste formato (todos os campos são strings; listas separadas por \n):
-{"titulo":"Nome","ingredientes":"- item\n- item","modoDePreparo":"1. passo\n2. passo","tempoDePreparo":"30 minutos","rendimento":"2 porções","dicasDoChef":"- dica","acompanhamento":"- item","guarnicao":"- item","categoria":"almoco"}
+{"titulo":"Nome","ingredientes":"- item\n- item","modoDePreparo":"1. passo\n2. passo","tempoDePreparo":"30 minutos","rendimento":"2 porções","dicasDoChef":"- dica","acompanhamento":"- item","guarnicao":"- item","categoria":"almoco","promptFoto":"creamy shrimp risotto with whole peeled shrimp on top"}
 Se o pedido não for sobre comida ou bebida, responda {"erro":"Minha especialidade é criar receitas deliciosas. Me conte que ingredientes você tem!"}.
 
 Regras:
 - categoria: almoco, cafe, jantar, lanche, doce, drink, especial, petiscos, restricoes ou diversos; deve refletir o tipo do pedido (nunca confunda doce, salgado e bebida).
+- promptFoto: em INGLÊS, uma frase com o prato pronto e os ingredientes principais que aparecem nele (ex.: o camarão, o queijo).
 - Receitas práticas, ingredientes comuns no Brasil, unidades brasileiras (g, ml, colheres, xícaras); nunca cup, tablespoon ou teaspoon.
 - Pratos clássicos (panacota, pudim, brigadeiro, mousse de maracujá, quiche, tiramisù...) seguem os ingredientes e a técnica tradicionais. Nunca invente combinações; na dúvida, a versão mais simples.
 - Drinks: ingredientes e preparo de bebida (ml, doses); o acompanhamento são só petiscos/comidas, nunca bebidas.
@@ -142,15 +143,15 @@ s.textContent = `
 document.head.appendChild(s);
 })();
 
-function fotoUrl(titulo) {
+function fotoUrl(titulo, promptFoto) {
 let seed = 0;
 for (const c of String(titulo)) seed = (seed * 31 + c.charCodeAt(0)) % 100000;
-const prompt = `${titulo}, professional food photography, beautifully plated, natural light, blurred background, no text`;
+const prompt = `${promptFoto || titulo}, professional food photography, beautifully plated, natural light, no text`;
 return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=768&height=512&nologo=true&seed=${seed}`;
 }
 
-function fotoHTML(titulo) {
-return `<img class="foto-receita" src="${escapeHtml(fotoUrl(titulo))}" alt="Foto: ${escapeHtml(titulo || '')}" onload="fotoReceitaOk(this)" onerror="fotoReceitaErro(this)">`;
+function fotoHTML(titulo, promptFoto) {
+return `<img class="foto-receita" src="${escapeHtml(fotoUrl(titulo, promptFoto))}" alt="Foto: ${escapeHtml(titulo || '')}" onload="fotoReceitaOk(this)" onerror="fotoReceitaErro(this)">`;
 }
 
 function fotoReceitaOk(img) {
@@ -400,7 +401,7 @@ jsonData.modoDePreparo = texto;
 console.log('formatResponse - texto após limpeza:', texto); // Debug
 }
 
-return this.createRecipeBox(this.formatJSONToHTML(jsonData), fotoHTML(jsonData.titulo));
+return this.createRecipeBox(this.formatJSONToHTML(jsonData), fotoHTML(jsonData.titulo, jsonData.promptFoto));
 
 } catch (jsonError) {
 console.log('Erro ao processar resposta:', jsonError.message);
@@ -1225,6 +1226,9 @@ console.log('Receitas migradas para o novo sistema de categorias');
 }
 
 function formatarReceitaParaExibicao(htmlConteudo) {
+// Tira a foto dos favoritos (evita pedir imagem de novo e gastar o limite)
+htmlConteudo = (htmlConteudo || '').replace(/<img class="foto-receita"[^>]*>/g, '');
+
 let conteudoProcessado = htmlConteudo || '';
 const tmp = document.createElement('div');
 tmp.innerHTML = conteudoProcessado.trim();
