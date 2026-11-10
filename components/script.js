@@ -66,12 +66,12 @@ GROQ_PROXY_URL: 'https://meuchef-theta.vercel.app/api/groq'
 });
 
 const SYSTEM_PROMPT = `Você é um chef brasileiro prático. Responda SEMPRE em português e APENAS com JSON válido, sem markdown nem texto extra, neste formato (todos os campos são strings; listas separadas por \n):
-{"titulo":"Nome","ingredientes":"- item\n- item","modoDePreparo":"1. passo\n2. passo","tempoDePreparo":"30 minutos","rendimento":"2 porções","dicasDoChef":"- dica","acompanhamento":"- item","guarnicao":"- item","categoria":"almoco","promptFoto":"creamy shrimp risotto with whole peeled shrimp on top"}
+{"titulo":"Nome","ingredientes":"- item\n- item","modoDePreparo":"1. passo\n2. passo","tempoDePreparo":"30 minutos","rendimento":"2 porções","dicasDoChef":"- dica","acompanhamento":"- item","guarnicao":"- item","categoria":"almoco","promptFoto":"creamy white arborio risotto with visible rice grains, topped with large golden seared shrimp, fresh parsley and lemon zest"}
 Se o pedido não for sobre comida ou bebida, responda {"erro":"Minha especialidade é criar receitas deliciosas. Me conte que ingredientes você tem!"}.
 
 Regras:
 - categoria: almoco, cafe, jantar, lanche, doce, drink, especial, petiscos, restricoes ou diversos; deve refletir o tipo do pedido (nunca confunda doce, salgado e bebida).
-- promptFoto: em INGLÊS, uma frase com o prato pronto e os ingredientes principais que aparecem nele (ex.: o camarão, o queijo).
+- promptFoto: em INGLÊS, uma frase descrevendo como o prato pronto parece: cor e textura da base, ingredientes principais visíveis e a decoração. Ex.: "creamy white arborio risotto with visible rice grains, topped with large golden seared shrimp, fresh parsley and lemon zest".
 - Receitas práticas, ingredientes comuns no Brasil, unidades brasileiras (g, ml, colheres, xícaras); nunca cup, tablespoon ou teaspoon.
 - Pratos clássicos (panacota, pudim, brigadeiro, mousse de maracujá, quiche, tiramisù...) seguem os ingredientes e a técnica tradicionais. Nunca invente combinações; na dúvida, a versão mais simples.
 - Drinks: ingredientes e preparo de bebida (ml, doses); o acompanhamento são só petiscos/comidas, nunca bebidas.
@@ -146,11 +146,15 @@ document.head.appendChild(s);
 function fotoUrl(titulo, promptFoto) {
 let seed = 0;
 for (const c of String(titulo)) seed = (seed * 31 + c.charCodeAt(0)) % 100000;
-const prompt = `${promptFoto || titulo}, professional food photography, beautifully plated, natural light, no text`;
-return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=768&height=512&nologo=true&seed=${seed}`;
+const prompt = `${promptFoto || titulo}, photorealistic food photography, 45 degree angle, 50mm lens, shallow depth of field, soft natural window light, white ceramic plate, restaurant quality, highly detailed, sharp focus, no text`;
+return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=1024&height=683&nologo=true&enhance=false&seed=${seed}`;
 }
 
 function fotoHTML(titulo, promptFoto) {
+const agora = Date.now();
+const ultima = Number(localStorage.getItem('ultimaFotoEm') || 0);
+if (agora - ultima < 46000) return '';
+localStorage.setItem('ultimaFotoEm', String(agora));
 return `<img class="foto-receita" src="${escapeHtml(fotoUrl(titulo, promptFoto))}" alt="Foto: ${escapeHtml(titulo || '')}" onload="fotoReceitaOk(this)" onerror="fotoReceitaErro(this)">`;
 }
 
