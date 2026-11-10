@@ -62,7 +62,8 @@ RETRY_BASE_DELAY: 1000,
 MAX_RETRIES: 3,
 MODAL_AUTO_CLOSE: 3000,
 MAX_TOKENS: 4000,
-GROQ_PROXY_URL: 'https://meuchef-theta.vercel.app/api/groq'
+GROQ_PROXY_URL: 'https://meuchef-theta.vercel.app/api/groq',
+FOTO_PROXY_URL: 'https://meuchef-theta.vercel.app/api/foto'
 });
 
 const SYSTEM_PROMPT = `Você é um chef brasileiro prático. Responda SEMPRE em português e APENAS com JSON válido, sem markdown nem texto extra, neste formato (todos os campos são strings; listas separadas por \n):
@@ -147,14 +148,10 @@ function fotoUrl(titulo, promptFoto) {
 let seed = 0;
 for (const c of String(titulo)) seed = (seed * 31 + c.charCodeAt(0)) % 100000;
 const prompt = `${promptFoto || titulo}, photorealistic food photography, 45 degree angle, 50mm lens, shallow depth of field, soft natural window light, white ceramic plate, restaurant quality, highly detailed, sharp focus, no text`;
-return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=1024&height=683&nologo=true&enhance=false&seed=${seed}`;
+return `${CONFIG.FOTO_PROXY_URL}?prompt=${encodeURIComponent(prompt)}`;
 }
 
 function fotoHTML(titulo, promptFoto) {
-const agora = Date.now();
-const ultima = Number(localStorage.getItem('ultimaFotoEm') || 0);
-if (agora - ultima < 46000) return '';
-localStorage.setItem('ultimaFotoEm', String(agora));
 return `<img class="foto-receita" src="${escapeHtml(fotoUrl(titulo, promptFoto))}" alt="Foto: ${escapeHtml(titulo || '')}" onload="fotoReceitaOk(this)" onerror="fotoReceitaErro(this)">`;
 }
 
