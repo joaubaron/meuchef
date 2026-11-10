@@ -72,9 +72,9 @@ Pedido de uma palavra ou só nome de prato, bebida ou ingrediente (ex.: "Paneton
 
 Regras:
 - categoria: almoco, cafe, jantar, lanche, doce, drink, especial, petiscos, restricoes ou diversos; deve refletir o tipo do pedido (nunca confunda doce, salgado e bebida).
-- promptFoto: em INGLÊS, uma frase descrevendo como ESTA receita fica pronta. COMECE pelo nome do prato em inglês e pela forma de servir (ex.: "a bowl of soup", "a tall glass of cocktail"). Depois descreva o tipo e a cor do molho, os ingredientes principais visíveis e a decoração. Para lasanha, descreva como "a baked layered lasagna casserole, cut into a square slice with clean straight edges, flat lasagna sheets, melted golden cheese crust on top" e não use as palavras "pasta" nem "noodles". Cite só decorações que estejam nos ingredientes (se for salsinha, escreva "chopped parsley"). Nunca cite embalagens, rótulos, marcas, letras, palavras ou placas; queijos, cremes e pastas aparecem só como alimento, sem embalagem, em pedaços, fatias ou tigelas. Use SÓ itens do campo ingredientes: nunca acrescente frutas, fatias, espuma, molhos ou enfeites que não estejam na lista. Para drinks, descreva o copo, a cor e a opacidade reais do líquido, o tipo de gelo (gelo picado = "crushed ice"; cubos = "ice cubes") e só a guarnição citada. Polpa de maracujá = "passion fruit pulp with small black seeds, opaque yellow-orange liquid"; hortelã = "fresh mint leaves". Em drinks, termine o promptFoto com "no citrus slice, no fruit garnish except those listed". Ex. de drink: "a short glass of cocktail filled with crushed ice, opaque yellow-orange passion fruit pulp with small black seeds, fresh mint leaves on top, no citrus slice, no lemon, no orange, no garnish besides mint". Ex.: "creamy white arborio risotto with visible rice grains, topped with large golden seared shrimp, fresh parsley and lemon zest".- Receitas práticas, ingredientes comuns no Brasil, unidades brasileiras (g, ml, colheres, xícaras); nunca cup, tablespoon ou teaspoon.
-- Pratos clássicos (panacota, pudim, brigadeiro, mousse de maracujá, quiche, tiramisù...) seguem os ingredientes e a técnica tradicionais. Nunca invente combinações; na dúvida, a versão mais simples.
-- Drinks: ingredientes e preparo de bebida (ml, doses); o acompanhamento são só petiscos/comidas, nunca bebidas.
+- promptFoto: em INGLÊS, uma frase descrevendo como ESTA receita fica pronta. COMECE pelo nome do prato em inglês e pela forma de servir (ex.: "a bowl of soup", "a tall glass of cocktail"). Depois descreva o tipo e a cor do molho, os ingredientes principais visíveis e a decoração. Para lasanha, descreva como "a baked layered lasagna casserole, cut into a square slice with clean straight edges, flat lasagna sheets, melted golden cheese crust on top" e não use as palavras "pasta" nem "noodles". Cite só decorações que estejam nos ingredientes (se for salsinha, escreva "chopped parsley"). Nunca cite embalagens, rótulos, marcas, letras, palavras ou placas; queijos, cremes e pastas aparecem só como alimento, sem embalagem, em pedaços, fatias ou tigelas. Use SÓ itens do campo ingredientes: nunca acrescente frutas, fatias, espuma, molhos ou enfeites que não estejam na lista. Para drinks, descreva o copo, a cor e a opacidade reais do líquido, o tipo de gelo (gelo picado = "crushed ice"; cubos = "ice cubes") e só a guarnição citada. Polpa de maracujá = "passion fruit pulp with small black seeds, opaque yellow-orange liquid"; hortelã = "fresh mint leaves". Em drinks, termine o promptFoto com "no citrus slice, no fruit garnish except those listed". Ex. de drink: "a short glass of cocktail filled with crushed ice, opaque yellow-orange passion fruit pulp with small black seeds, fresh mint leaves on top, no citrus slice, no lemon, no orange, no garnish besides mint". Ex.: "creamy white arborio risotto with visible rice grains, topped with large golden seared shrimp, fresh parsley and lemon zest".
+- Receitas práticas, ingredientes comuns no Brasil, unidades brasileiras (g, ml, colheres, xícaras); nunca cup, tablespoon ou teaspoon.
+- Pratos clássicos (panacota, pudim, brigadeiro, mousse de maracujá, quiche, tiramisù...) seguem os ingredientes e a técnica tradicionais. Nunca invente combinações; na dúvida, a versão mais simples.- Drinks: ingredientes e preparo de bebida (ml, doses); o acompanhamento são só petiscos/comidas, nunca bebidas.
 - Restrições citadas (sem ovo, sem lactose, alergias, vegano etc.) são proibição total em todos os campos, inclusive derivados (maionese tem ovo; manteiga tem lactose). Se o prato clássico leva o ingrediente, adapte.
 - Inclua ao menos uma dica de chef profissional.`;
 
@@ -674,6 +674,7 @@ Regras:
 async function gerarReceitaComIA(ingredientes, alternativa = false, tipoPrato = "comida") {
 const quantidadePessoas = extrairQuantidadePessoas(ingredientes);
 const promptUsuario = construirPromptReceita(ingredientes, quantidadePessoas, tipoPrato, alternativa);
+let promptAtual = promptUsuario;
 
 console.log('Chamando proxy Vercel (Groq)...', ingredientes);
 
@@ -691,7 +692,7 @@ reasoning_effort: 'low',
 response_format: { type: 'json_object' },
 messages: [
 { role: 'system', content: SYSTEM_PROMPT },
-{ role: 'user', content: promptUsuario }
+{ role: 'user', content: promptAtual }
 ]
 })
 }
@@ -710,9 +711,9 @@ let clean = content.trim()
 // Valida estrutura mínima
 const parsed = JSON.parse(clean);
 if (parsed.erro) {
-const erroPedido = new Error(parsed.erro);
-erroPedido.naoRepetir = true;
-throw erroPedido;
+// Pode ser falso positivo: na 2ª tentativa, reforça que é pedido de comida
+promptAtual = promptUsuario + '\n\nIMPORTANTE: este pedido é sobre comida ou bebida. Gere a receita completa. Não responda erro.';
+throw new Error(parsed.erro);
 }
 if (!parsed.titulo || !parsed.ingredientes || !parsed.modoDePreparo) {
 throw new Error('Receita incompleta recebida. Tente novamente.');
@@ -722,7 +723,7 @@ console.log('Receita gerada com sucesso!');
 return clean;
 } catch (e) {
 console.warn(`Resposta inválida (tentativa ${tentativa}):`, e.message);
-if (e.naoRepetir || tentativa === 2) throw e;
+if (tentativa === 2) throw e;
 }
 }
 }
