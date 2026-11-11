@@ -4,12 +4,6 @@ export default async function handler(req, res) {
   const prompt = String(req.query.prompt || '').slice(0, 900);
   if (!prompt) return res.status(400).send('sem prompt');
 
-  // seed fixo a partir do prompt: mesmo texto, mesma imagem
-  let seed = 5381;
-  for (let i = 0; i < prompt.length; i++) {
-    seed = ((seed * 33) ^ prompt.charCodeAt(i)) >>> 0;
-  }
-
   try {
     const r = await fetch(
       `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/ai/run/@cf/black-forest-labs/flux-1-schnell`,
@@ -19,7 +13,7 @@ export default async function handler(req, res) {
           Authorization: `Bearer ${process.env.CF_API_TOKEN}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ prompt, steps: 2, seed })
+        body: JSON.stringify({ prompt, steps: 4 })
       }
     );
     const data = await r.json();
