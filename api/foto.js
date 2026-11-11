@@ -11,7 +11,7 @@ export default async function handler(req, res) {
           Authorization: `Bearer ${process.env.CF_API_TOKEN}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ prompt, steps: 6 })
+        body: JSON.stringify({ prompt, steps: 4 })
       }
     );
     const data = await r.json();
@@ -22,6 +22,6 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     res.send(Buffer.from(b64, 'base64'));
   } catch (e) {
-    res.status(502).send('falha');
+    res.status(502).send('falha: ' + String(e.message || e).slice(0, 200));
   }
 }
