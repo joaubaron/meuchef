@@ -1423,9 +1423,6 @@ console.error("Erro: Elementos do modal de favoritos não encontrados.");
 return;
 }
 
-// Guarda a categoria para sabermos qual aba abrir ao voltar
-AppState.ultimaCategoriaAberta = receita.categoria;
-
 const conteudoFormatado = formatarReceitaParaExibicao(receita.conteudo);
 
 const receitaFormatadaHTML = `
@@ -1763,29 +1760,7 @@ if (listaTitulos) listaTitulos.classList.remove('oculto');
 if (receitaCompleta) receitaCompleta.classList.add('oculto');
 if (conteudoReceita) conteudoReceita.innerHTML = '';
 AppState.indiceFavoritoAtual = -1;
-
-// Garante que o filtro superior volte para "Todas" (valor vazio '')
-const selectCategoria = document.getElementById('filtroCategoria');
-if (selectCategoria) {
-selectCategoria.value = '';
-}
-
-// Executa o filtro para desenhar todas as abas fechadas
 filtrarFavoritos();
-
-// Após desenhar, se houver uma categoria salva, localiza o cabeçalho dela e simula o clique para abri-la
-if (AppState.ultimaCategoriaAberta) {
-setTimeout(() => {
-const grupos = document.querySelectorAll('.categoria-grupo');
-grupos.forEach(grupo => {
-const tituloH4 = grupo.querySelector('.categoria-titulo');
-if (tituloH4 && tituloH4.textContent.toLowerCase().includes(AppState.ultimaCategoriaAberta.toLowerCase())) {
-// Usa a função existente toggleCategoria para abrir apenas essa aba
-toggleCategoria(tituloH4);
-}
-});
-}, 50);
-}
 }
 
 function exportarFavoritosComCategorias() {
