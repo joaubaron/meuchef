@@ -1,3 +1,3 @@
 Android: https://joaubaron.github.io/meuchef/
 
-Browser: meuchef-theta.vercel.app
+Browser: https://meuchef-theta.vercel.app/
