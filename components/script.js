@@ -1166,28 +1166,6 @@ conteudoReceita.innerHTML = '';
 receitaCompleta.classList.add('oculto');
 listaTitulos.classList.remove('oculto');
 
-// --- CORREÇÃO: Manter a última categoria aberta ao voltar ---
-let categoriaAberta = '';
-const listaExistente = document.getElementById('listaReceitasFiltradas');
-if (listaExistente) {
-const aberta = listaExistente.querySelector('.receitas-categoria:not(.oculto)');
-if (aberta) {
-// Pega o id da categoria a partir do título (ex: "🥗 Jantar (2)")
-const tituloEl = aberta.previousElementSibling;
-if (tituloEl && tituloEl.classList.contains('categoria-titulo')) {
-const texto = tituloEl.textContent.trim();
-const match = texto.match(/^(\S+)\s/); // Pega o emoji ou primeira palavra
-if (match) {
-// Encontra a categoria pelo nome
-const nomeCat = texto.replace(match[1], '').split('(')[0].trim();
-const cat = categoriasPredefinidas.find(c => c.nome === nomeCat);
-if (cat) categoriaAberta = cat.id;
-}
-}
-}
-}
-// -----------------------------------------------------------
-
 listaTitulos.innerHTML = `
 <div class="busca-categorias-container">
 <div class="busca-filtro-row">
@@ -1214,15 +1192,6 @@ ${categoriasPredefinidas.map(cat => `<option value="${cat.id}">${cat.emoji} ${ca
 `;
 
 modal.classList.remove('oculto');
-
-// Aplica a categoria aberta antes de filtrar
-if (categoriaAberta) {
-const select = document.getElementById('filtroCategoria');
-if (select) {
-select.value = categoriaAberta;
-}
-}
-
 filtrarFavoritos();
 
 const inputBusca = document.getElementById('buscaFavoritos');
@@ -1450,25 +1419,13 @@ receitaCompleta.classList.remove('oculto');
 mostrarFotoFavorito(receita);
 }
 
-// --- CORREÇÃO: COMPARTILHAR FAVORITO COM FOTO ---
-async function compartilharFavoritoAtual() {
+function compartilharFavoritoAtual() {
 if (AppState.indiceFavoritoAtual >= 0) {
 const receita = AppState.receitasFavoritas[AppState.indiceFavoritoAtual];
 const titulo = extrairTitulo(receita.conteudo);
-const conteudoHTML = formatarReceitaParaExibicao(receita.conteudo);
-
-// Tenta obter o blob da foto salva
-const urlFoto = urlFotoDoFavorito(receita);
-let blob = null;
-try {
-blob = await FotoDB.obter(urlFoto);
-} catch (e) { console.warn('Erro ao buscar blob', e); }
-
-// Chama a função de compartilhamento passando o blob
-compartilharReceita(titulo, conteudoHTML, blob);
+compartilharReceita(titulo, receita.conteudo);
 }
 }
-// -----------------------------------------------
 
 function excluirFavoritoAtual() {
 if (AppState.indiceFavoritoAtual >= 0) {
@@ -1756,25 +1713,10 @@ const listaTitulos = document.getElementById('listaTitulosFavoritos');
 const receitaCompleta = document.getElementById('receitaCompletaFavorito');
 const conteudoReceita = document.getElementById('conteudoReceitaFavorito');
 
-// --- CORREÇÃO: lembrar a categoria da receita que estava aberta ---
-let categoriaDaReceita = '';
-if (AppState.indiceFavoritoAtual >= 0) {
-const receita = AppState.receitasFavoritas[AppState.indiceFavoritoAtual];
-categoriaDaReceita = receita.categoria || '';
-}
-// ----------------------------------------------------------------
-
 if (listaTitulos) listaTitulos.classList.remove('oculto');
 if (receitaCompleta) receitaCompleta.classList.add('oculto');
 if (conteudoReceita) conteudoReceita.innerHTML = '';
 AppState.indiceFavoritoAtual = -1;
-
-// Reaplica a categoria no select antes de filtrar
-if (categoriaDaReceita) {
-const select = document.getElementById('filtroCategoria');
-if (select) select.value = categoriaDaReceita;
-}
-
 filtrarFavoritos();
 }
 
@@ -1977,8 +1919,7 @@ reader.readAsText(file);
 }
 
 // === SHARE FUNCTION ===
-// --- CORREÇÃO: Aceita blob de imagem e compartilha via navigator.share ---
-async function compartilharReceita(titulo, conteudoHTML, imageBlob = null) {
+function compartilharReceita(titulo, conteudoHTML) {
 const tempDiv = document.createElement('div');
 tempDiv.innerHTML = conteudoHTML;
 const recipeOutput = tempDiv.querySelector('.recipe-output');
@@ -1990,36 +1931,14 @@ textoFormatado = textoFormatado.replace(/(🌿 Ingredientes)/, '\n$1\n').replace
 textoFormatado = textoFormatado.replace(/(🥘 Modo de Preparo\n)([\s\S]*?)(?=\n\n⏳|\n\n🧺|\n\n⭐|\n\n🍹|\n\n🥗|$)/, (match, tituloSecao, conteudoSecao) => { const passos = conteudoSecao.split('\n').filter(passo => passo.trim()).map((passo, index) => { const passoLimpo = passo.replace(/^\s*\d+\.\s*/, '').trim(); return passoLimpo ? `${index + 1}. ${passoLimpo}` : ''; }).filter(passo => passo !== '').join('\n'); return `${tituloSecao}${passos}\n`; });
 textoFormatado = textoFormatado.replace(/\n{3,}/g, '\n\n');
 const shareText = `${textoFormatado}\n\nQualquer um pode cozinhar!\nBom apetite!`;
-
 const scrollPosition = window.scrollY || window.pageYOffset;
 const restaurarScroll = () => { setTimeout(() => window.scrollTo(0, scrollPosition), 100); };
-
-// Prepara os dados para compartilhamento (com ou sem foto)
-let shareData = { title: titulo, text: shareText };
-
-if (imageBlob) {
-const file = new File([imageBlob], 'receita.jpg', { type: 'image/jpeg' });
-if (navigator.canShare && navigator.canShare({ files: [file] })) {
-shareData.files = [file];
-}
-}
-
 if (navigator.share) {
-navigator.share(shareData).then(() => restaurarScroll()).catch(() => {
-// Se falhar com arquivo, tenta sem
-if (shareData.files) {
-delete shareData.files;
-navigator.share(shareData).then(() => restaurarScroll()).catch(() => restaurarScroll());
+navigator.share({ title: titulo, text: shareText }).then(() => restaurarScroll()).catch(() => restaurarScroll());
 } else {
-restaurarScroll();
-}
-});
-} else {
-// Fallback para clipboard
 navigator.clipboard.writeText(shareText).then(() => { showCustomModal('📋 Receita copiada!'); restaurarScroll(); }).catch(() => { showCustomModal('❌ Não foi possível compartilhar'); restaurarScroll(); });
 }
 }
-// -----------------------------------------------
 
 // === MAIN GENERATION FUNCTIONS ===
 async function gerarReceita(event) {
