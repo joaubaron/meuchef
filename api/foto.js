@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     );
     const data = await r.json();
     const b64 = data?.result?.image;
-    if (!r.ok || !b64) return res.status(502).send('falha');
+    if (!r.ok || !b64) return res.status(502).send('falha: ' + JSON.stringify(data?.errors || data).slice(0, 300));
 
     res.setHeader('Content-Type', 'image/jpeg');
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
