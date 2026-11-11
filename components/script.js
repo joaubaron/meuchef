@@ -1756,10 +1756,25 @@ const listaTitulos = document.getElementById('listaTitulosFavoritos');
 const receitaCompleta = document.getElementById('receitaCompletaFavorito');
 const conteudoReceita = document.getElementById('conteudoReceitaFavorito');
 
+// --- CORREÇÃO: lembrar a categoria da receita que estava aberta ---
+let categoriaDaReceita = '';
+if (AppState.indiceFavoritoAtual >= 0) {
+const receita = AppState.receitasFavoritas[AppState.indiceFavoritoAtual];
+categoriaDaReceita = receita.categoria || '';
+}
+// ----------------------------------------------------------------
+
 if (listaTitulos) listaTitulos.classList.remove('oculto');
 if (receitaCompleta) receitaCompleta.classList.add('oculto');
 if (conteudoReceita) conteudoReceita.innerHTML = '';
 AppState.indiceFavoritoAtual = -1;
+
+// Reaplica a categoria no select antes de filtrar
+if (categoriaDaReceita) {
+const select = document.getElementById('filtroCategoria');
+if (select) select.value = categoriaDaReceita;
+}
+
 filtrarFavoritos();
 }
 
