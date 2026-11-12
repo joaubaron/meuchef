@@ -261,13 +261,13 @@ button:disabled { opacity: 0.7; cursor: default; }
   justify-content: center;
   gap: 6px;
   white-space: nowrap;
-  box-shadow: 0 6px 14px rgba(198, 74, 10, 0.28);
+  box-shadow: none;
   transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
 
 .botoes-empilhados .linha-botao button:active {
   transform: scale(0.98);
-  box-shadow: 0 4px 10px rgba(198, 74, 10, 0.25);
+  box-shadow: none;
 }
 
 @media (hover: hover) {
