@@ -2286,43 +2286,50 @@ target: botaoPrincipal
 
 // Simulador de pull-to-refresh para PWA instalado
 let touchStartY = 0;
+let touchStartX = 0;
 let touchCurrentY = 0;
-const PULL_THRESHOLD = 100; // Distância em pixels para disparar
+let touchCurrentX = 0;
+let ptrAtivo = false;
+const PULL_THRESHOLD = 250; // distância em pixels para recarregar
 
 document.addEventListener('touchstart', (e) => {
-// Só ativa se estiver no topo da página
-if (window.scrollY === 0) {
+ptrAtivo = false;
+touchCurrentY = 0;
+touchCurrentX = 0;
+
+// Só no topo da página e nunca dentro de modais, campo de texto ou vídeo
+const bloqueado = e.target.closest('#modalFavoritos, .modal-categoria-overlay, .custom-modal-overlay, #remyTela, textarea, input, select');
+if (window.scrollY === 0 && !bloqueado && e.touches.length === 1) {
 touchStartY = e.touches[0].clientY;
-} else {
-touchStartY = 0;
+touchStartX = e.touches[0].clientX;
+ptrAtivo = true;
 }
 }, { passive: true });
 
 document.addEventListener('touchmove', (e) => {
-if (touchStartY === 0) return;
-
-touchCurrentY = e.touches[0].clientY;
-const pullDistance = touchCurrentY - touchStartY;
-
-// Se puxar para baixo o suficiente, mostra feedback visual (opcional)
-if (pullDistance > 0) {
-// Você pode adicionar um indicador visual aqui se quiser
-// Ex: document.body.style.transform = `translateY(${pullDistance / 2}px)`;
+if (!ptrAtivo) return;
+if (e.touches.length !== 1 || window.scrollY !== 0) {
+ptrAtivo = false;
+return;
 }
+touchCurrentY = e.touches[0].clientY;
+touchCurrentX = e.touches[0].clientX;
 }, { passive: true });
 
 document.addEventListener('touchend', () => {
-if (touchStartY === 0) return;
+if (!ptrAtivo) return;
+ptrAtivo = false;
 
-const pullDistance = touchCurrentY - touchStartY;
+if (!touchCurrentY) return; // foi só um toque, sem arrastar
 
-if (pullDistance > PULL_THRESHOLD && window.scrollY === 0) {
-// Força a atualização limpando o cache (opcional) ou só recarregando
-window.location.reload(true);
+const pullY = touchCurrentY - touchStartY;
+const pullX = Math.abs(touchCurrentX - touchStartX);
+
+// Precisa ser puxão longo, bem vertical, e ainda no topo
+if (pullY > PULL_THRESHOLD && pullY > pullX * 2 && window.scrollY === 0) {
+window.location.reload();
 }
 
-// Reseta
 touchStartY = 0;
 touchCurrentY = 0;
-// document.body.style.transform = ''; // Se usou feedback visual
 });
