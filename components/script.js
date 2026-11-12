@@ -1429,7 +1429,7 @@ const receitaFormatadaHTML = `
 <div class="recipe-box">
 <div class="botoes-receita">
 <button onclick="excluirFavoritoAtual()" class="botao-excluir">🗑️ Excluir</button>
-<button onclick="compartilharFavoritoAtual()" class="botao-padrao">🔗 Compartilhar</button>
+<button onclick="compartilharFavoritoAtual()" class="botao-padrao">🔗 Enviar</button>
 <button onclick="voltarParaListaFavoritos()" class="botao-padrao">📋 Favoritos</button>
 <button onclick="renomearFavorito()" class="botao-padrao">✏️ Renomear</button>
 <button onclick="mudarCategoriaFavorito()" class="botao-padrao">🏷️ Mudar</button>
