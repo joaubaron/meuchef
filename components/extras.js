@@ -159,7 +159,7 @@
         '<div class="compras-sub"></div>' +
         '<div class="compras-dica">Marque o que você já tem.</div>' +
         '<div class="compras-itens"></div>' +
-        '<div class="cook-nav"><button type="button" class="compras-compartilhar">📤 Compartilhar o que falta</button></div>'
+        '<div class="cook-nav"><button type="button" class="compras-compartilhar">📤 Compartilhar ingredientes</button></div>'
       );
       compras.querySelector('.cook-fechar').addEventListener('click', () => compras.classList.add('oculto'));
       compras.querySelector('.compras-compartilhar').addEventListener('click', compartilharCompras);
