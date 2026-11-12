@@ -113,21 +113,92 @@
       );
       cook.querySelector('.cook-fechar').addEventListener('click', fecharCook);
       cook.querySelector('.cook-voltar').addEventListener('click', () => {
-        if (idx > 0) { idx--; desenharCook(); }
+        if (idx > 0) { 
+          idx--; 
+          // Garante que o botão "Próximo" volte ao normal se estiver vendo a foto
+          const btnProximo = cook.querySelector('.cook-proximo');
+          if (btnProximo.textContent === 'Concluir') {
+            const novoBtn = btnProximo.cloneNode(true);
+            btnProximo.replaceWith(novoBtn);
+            novoBtn.addEventListener('click', avancarCook);
+          }
+          cook.querySelector('.cook-voltar').style.display = ''; // Mostra o voltar
+          cook.querySelector('.cook-passo').innerHTML = '<span></span>'; // Limpa a imagem
+          desenharCook(); 
+        }
       });
-      cook.querySelector('.cook-proximo').addEventListener('click', () => {
-        if (idx < passos.length - 1) { idx++; desenharCook(); } else { fecharCook(); }
-      });
+      cook.querySelector('.cook-proximo').addEventListener('click', avancarCook);
+    }
+
+    function avancarCook() {
+      if (idx < passos.length - 1) { 
+        idx++; 
+        desenharCook(); 
+      } else if (idx === passos.length - 1) {
+        mostrarFoto();
+      } else {
+        fecharCook();
+      }
     }
 
     function desenharCook() {
       cook.querySelector('.cook-contador').textContent = 'Passo ' + (idx + 1) + ' de ' + passos.length;
       cook.querySelector('.cook-barra').style.width = ((idx + 1) / passos.length * 100) + '%';
       const alvo = cook.querySelector('.cook-passo');
-      alvo.firstElementChild.textContent = passos[idx];
+      if (alvo.firstElementChild.tagName !== 'IMG') {
+        alvo.firstElementChild.textContent = passos[idx];
+      } else {
+        alvo.innerHTML = '<span>' + passos[idx] + '</span>';
+      }
       alvo.scrollTop = 0;
       cook.querySelector('.cook-voltar').disabled = (idx === 0);
-      cook.querySelector('.cook-proximo').textContent = (idx === passos.length - 1) ? '🎉 Pronto' : 'Próximo →';
+      cook.querySelector('.cook-proximo').textContent = (idx === passos.length - 1) ? 'Ver foto 🍽️' : 'Próximo →';
+    }
+
+    function mostrarFoto() {
+      const titulo = cook.querySelector('.cook-titulo').textContent;
+      let seed = 0;
+      for (const c of String(titulo)) seed = (seed * 31 + c.charCodeAt(0)) % 100000;
+      const prompt = `${titulo}, photorealistic food photography, 45 degree angle, 50mm lens, shallow depth of field, soft natural window light, white ceramic plate, restaurant quality, highly detailed, sharp focus, no text, no letters, no words, no logo, no label, no packaging, no brand name, unbranded`;
+      const url = `https://meuchef-theta.vercel.app/api/foto?prompt=${encodeURIComponent(prompt)}`;
+
+      // Atualiza a interface para "Carregando"
+      cook.querySelector('.cook-contador').textContent = 'Preparando a foto...';
+      cook.querySelector('.cook-barra').style.width = '100%';
+      cook.querySelector('.cook-voltar').style.display = 'none';
+
+      const carregarEFechar = (src) => {
+        const img = document.createElement('img');
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = '100%';
+        img.style.objectFit = 'contain';
+        img.style.borderRadius = '14px';
+        img.src = src;
+        
+        const alvo = cook.querySelector('.cook-passo');
+        alvo.innerHTML = '';
+        alvo.appendChild(img);
+        
+        cook.querySelector('.cook-contador').textContent = 'Bom apetite! 🍽️';
+        
+        const btn = cook.querySelector('.cook-proximo');
+        btn.textContent = 'Concluir';
+        btn.disabled = false;
+        
+        const novoBtn = btn.cloneNode(true);
+        btn.replaceWith(novoBtn);
+        novoBtn.addEventListener('click', fecharCook);
+      };
+
+      if (typeof FotoDB !== 'undefined') {
+        FotoDB.obter(url).then(blob => {
+          carregarEFechar(blob ? URL.createObjectURL(blob) : url);
+        }).catch(() => {
+          carregarEFechar(url);
+        });
+      } else {
+        carregarEFechar(url);
+      }
     }
 
     function abrirCook(receita) {
@@ -135,6 +206,16 @@
       passos = receita.passos;
       idx = 0;
       cook.querySelector('.cook-titulo').textContent = receita.titulo;
+      cook.querySelector('.cook-voltar').style.display = '';
+      cook.querySelector('.cook-passo').innerHTML = '<span></span>';
+      
+      const btn = cook.querySelector('.cook-proximo');
+      if (btn.textContent === 'Concluir') {
+        const novoBtn = btn.cloneNode(true);
+        btn.replaceWith(novoBtn);
+        novoBtn.addEventListener('click', avancarCook);
+      }
+      
       desenharCook();
       cook.classList.remove('oculto');
       cookAberto = true;
@@ -192,7 +273,7 @@
           return;
         }
       } catch (e) {
-        if (e && e.name === 'AbortError') return; // usuário fechou o menu
+        if (e && e.name === 'AbortError') return;
       }
       try {
         await navigator.clipboard.writeText(texto);
@@ -227,7 +308,7 @@
       }
     }
 
-    // ---------- Botões na receita recém-gerada (ficam FORA do que é salvo) ----------
+    // ---------- Botões na receita recém-gerada ----------
     let barra = null;
 
     function garantirBarra() {
@@ -262,18 +343,14 @@
       const botoes = caixa && caixa.querySelector('.botoes-receita');
       if (!botoes) return;
 
-      // Se já injetou os novos, não faz de novo
       if (document.getElementById('btn-extra-compras')) return;
 
-      // Esconde os botões antigos do script.js (apenas os que ativavam as ações, se existirem)
       botoes.querySelectorAll('button').forEach(b => {
-        // Aqui a gente garante que NÃO vai esconder o botão "Cozinha" de fechar o modal
         if (b.textContent.includes('Compras') || (b.textContent.includes('Cozinhar') && !b.textContent.includes('Cozinha'))) {
           b.style.setProperty('display', 'none', 'important');
         }
       });
 
-      // Adiciona os seus botões novos com os IDs para controle
       const btnCompras = document.createElement('button');
       btnCompras.id = 'btn-extra-compras';
       btnCompras.type = 'button';
@@ -346,7 +423,7 @@
     function restaurarRecente(item) {
       const resultado = document.getElementById('resultado');
       if (!resultado) return;
-      restaurando = true; // não conta como receita nova
+      restaurando = true;
       resultado.innerHTML = item.html;
       resultado.classList.remove('empty');
       setTimeout(() => { restaurando = false; }, 0);
