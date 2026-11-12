@@ -1427,7 +1427,7 @@ button:focus-visible, .tag:focus-visible, .item-favorito:focus-visible, a:focus-
 .cook-proximo, .compras-compartilhar {
   background: linear-gradient(135deg, var(--terracota-claro), var(--terracota));
   color: #fff;
-  box-shadow: 0 8px 18px rgba(198, 74, 10, 0.28);
+  box-shadow: none;
 }
 
 /* Lista de compras */
