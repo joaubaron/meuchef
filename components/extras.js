@@ -257,21 +257,20 @@
     }
 
     // ---------- Botões na receita favorita ----------
-    function injetarFavorito() {
-      const caixa = document.querySelector('#conteudoReceitaFavorito .recipe-box');
-      const botoes = caixa && caixa.querySelector('.botoes-receita');
-      if (!botoes || botoes.querySelector('.btn-extra')) return;
+function injetarFavorito() {
+  const caixa = document.querySelector('#conteudoReceitaFavorito .recipe-box');
+  const botoes = caixa && caixa.querySelector('.botoes-receita');
+  if (!botoes || botoes.querySelector('.btn-extra')) return;
 
-      const excluir = botoes.querySelector('.botao-excluir');
-      [['cozinhar', '🍳 Cozinhar'], ['compras', '🛒 Compras']].forEach(par => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'botao-padrao btn-extra';
-        b.textContent = par[1];
-        b.addEventListener('click', () => tratarAcao(par[0], caixa));
-        botoes.insertBefore(b, excluir); // Excluir continua por último
-      });
-    }
+  [['compras', '🛒 Compras'], ['cozinhar', '🍳 Cozinhar']].forEach(par => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'botao-padrao btn-extra';
+    b.textContent = par[1];
+    b.addEventListener('click', () => tratarAcao(par[0], caixa));
+    botoes.appendChild(b);
+  });
+}
 
     // ---------- RECENTES (últimas 10 receitas geradas) ----------
     const CHAVE_RECENTES = 'meuchef_recentes';
