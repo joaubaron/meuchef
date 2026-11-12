@@ -238,9 +238,10 @@
       barra = document.createElement('div');
       barra.id = 'extrasReceita';
       barra.className = 'oculto';
+      // CORRIGIDO AQUI: As ações e os textos estão na ordem certa
       barra.innerHTML =
-        '<button type="button" data-acao="cozinhar">🛒 Compras</button>' +
-        '<button type="button" data-acao="compras">🍳 Cozinhar</button>';
+        '<button type="button" data-acao="compras">🧺 Mercado</button>' +
+        '<button type="button" data-acao="cozinhar">👨‍🍳 Cozinhar</button>';
       barra.addEventListener('click', e => {
         const botao = e.target.closest('button');
         if (!botao) return;
@@ -257,20 +258,38 @@
     }
 
     // ---------- Botões na receita favorita ----------
-function injetarFavorito() {
-  const caixa = document.querySelector('#conteudoReceitaFavorito .recipe-box');
-  const botoes = caixa && caixa.querySelector('.botoes-receita');
-  if (!botoes || botoes.querySelector('.btn-extra')) return;
+    function injetarFavorito() {
+      const caixa = document.querySelector('#conteudoReceitaFavorito .recipe-box');
+      const botoes = caixa && caixa.querySelector('.botoes-receita');
+      if (!botoes) return;
 
-  [['compras', '🛒 Compras'], ['cozinhar', '🍳 Cozinhar']].forEach(par => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'botao-padrao btn-extra';
-    b.textContent = par[1];
-    b.addEventListener('click', () => tratarAcao(par[0], caixa));
-    botoes.appendChild(b);
-  });
-}
+      // Se já injetou os novos, não faz de novo
+      if (document.getElementById('btn-extra-compras')) return;
+
+      // Esconde os botões antigos do script.js e remove a classe para não ocupar espaço
+      botoes.querySelectorAll('button').forEach(b => {
+        if (b.textContent.includes('Compras') || b.textContent.includes('Cozinha')) {
+          b.style.setProperty('display', 'none', 'important');
+        }
+      });
+
+      // Adiciona os seus botões novos com os IDs para controle
+      const btnCompras = document.createElement('button');
+      btnCompras.id = 'btn-extra-compras';
+      btnCompras.type = 'button';
+      btnCompras.className = 'botao-padrao btn-extra';
+      btnCompras.textContent = '🧺 Mercado';
+      btnCompras.addEventListener('click', () => tratarAcao('compras', caixa));
+      botoes.appendChild(btnCompras);
+
+      const btnCozinhar = document.createElement('button');
+      btnCozinhar.id = 'btn-extra-cozinhar';
+      btnCozinhar.type = 'button';
+      btnCozinhar.className = 'botao-padrao btn-extra';
+      btnCozinhar.textContent = '👨‍🍳 Cozinhar';
+      btnCozinhar.addEventListener('click', () => tratarAcao('cozinhar', caixa));
+      botoes.appendChild(btnCozinhar);
+    }
 
     // ---------- RECENTES (últimas 10 receitas geradas) ----------
     const CHAVE_RECENTES = 'meuchef_recentes';
