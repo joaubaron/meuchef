@@ -239,8 +239,8 @@
       barra.id = 'extrasReceita';
       barra.className = 'oculto';
       barra.innerHTML =
-        '<button type="button" data-acao="cozinhar">👨‍🍳 Cozinhar</button>' +
-        '<button type="button" data-acao="compras">🧺 Mercado</button>';
+        '<button type="button" data-acao="cozinhar">🛒 Compras</button>' +
+        '<button type="button" data-acao="compras">🍳 Cozinhar</button>';
       barra.addEventListener('click', e => {
         const botao = e.target.closest('button');
         if (!botao) return;
