@@ -1432,6 +1432,7 @@ const receitaFormatadaHTML = `
 <button onclick="voltarParaListaFavoritos()" class="botao-padrao">📋 Favoritos</button>
 <button onclick="renomearFavorito()" class="botao-padrao">✏️ Renomear</button>
 <button onclick="mudarCategoriaFavorito()" class="botao-padrao">🏷️ Mudar</button>
+<button onclick="fecharModalFavoritos()" class="botao-padrao">🛒 Cozinha</button>
 <button onclick="excluirFavoritoAtual()" class="botao-excluir">🗑️ Excluir</button>
 </div>
 ${conteudoFormatado}
