@@ -179,7 +179,7 @@
         alvo.innerHTML = '';
         alvo.appendChild(img);
         
-        cook.querySelector('.cook-contador').textContent = 'Bom apetite! 🍽️';
+        cook.querySelector('.cook-contador').textContent = 'Bom apetite!';
         
         const btn = cook.querySelector('.cook-proximo');
         btn.textContent = 'Concluir';
