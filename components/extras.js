@@ -238,10 +238,9 @@
       barra = document.createElement('div');
       barra.id = 'extrasReceita';
       barra.className = 'oculto';
-      // CORRIGIDO AQUI: As ações e os textos estão na ordem certa
       barra.innerHTML =
-        '<button type="button" data-acao="compras">🧺 Mercado</button>' +
-        '<button type="button" data-acao="cozinhar">👨‍🍳 Cozinhar</button>';
+        '<button type="button" data-acao="compras">🧺 Ir ao mercado</button>' +
+        '<button type="button" data-acao="cozinhar">👨‍🍳 Cozinhar essa receita</button>';
       barra.addEventListener('click', e => {
         const botao = e.target.closest('button');
         if (!botao) return;
@@ -258,7 +257,7 @@
     }
 
     // ---------- Botões na receita favorita ----------
-        function injetarFavorito() {
+    function injetarFavorito() {
       const caixa = document.querySelector('#conteudoReceitaFavorito .recipe-box');
       const botoes = caixa && caixa.querySelector('.botoes-receita');
       if (!botoes) return;
@@ -279,7 +278,7 @@
       btnCompras.id = 'btn-extra-compras';
       btnCompras.type = 'button';
       btnCompras.className = 'botao-padrao btn-extra';
-      btnCompras.textContent = '🧺 Mercado';
+      btnCompras.textContent = '🧺 Ir ao mercado';
       btnCompras.addEventListener('click', () => tratarAcao('compras', caixa));
       botoes.appendChild(btnCompras);
 
@@ -287,7 +286,7 @@
       btnCozinhar.id = 'btn-extra-cozinhar';
       btnCozinhar.type = 'button';
       btnCozinhar.className = 'botao-padrao btn-extra';
-      btnCozinhar.textContent = '👨‍🍳 Cozinhar';
+      btnCozinhar.textContent = '👨‍🍳 Cozinhar essa receita';
       btnCozinhar.addEventListener('click', () => tratarAcao('cozinhar', caixa));
       botoes.appendChild(btnCozinhar);
     }
