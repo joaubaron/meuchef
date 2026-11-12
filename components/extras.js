@@ -152,7 +152,7 @@
       }
       alvo.scrollTop = 0;
       cook.querySelector('.cook-voltar').disabled = (idx === 0);
-      cook.querySelector('.cook-proximo').textContent = (idx === passos.length - 1) ? 'Ver foto 🍽️' : 'Próximo →';
+      cook.querySelector('.cook-proximo').textContent = (idx === passos.length - 1) ? 'Ver foto →' : 'Próximo →';
     }
 
     // Foto do favorito: vem do IndexedDB (sem gastar cota).
@@ -202,7 +202,7 @@
       const src = await obterFotoCook();
       if (!cookAberto) return;
 
-      cook.querySelector('.cook-contador').textContent = 'Bom apetite! 🍽️';
+      cook.querySelector('.cook-contador').textContent = 'Qualquer um pode cozinhar!';
       cook.querySelector('.cook-barra').style.width = '100%';
       cook.querySelector('.cook-voltar').style.display = 'none';
 
