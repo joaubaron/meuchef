@@ -64,7 +64,6 @@
       el.className = 'cook-overlay oculto';
       el.setAttribute('role', 'dialog');
       el.innerHTML = html;
-      // Evita que o "puxar para recarregar" do script.js dispare aqui dentro
       ['touchstart', 'touchmove', 'touchend'].forEach(ev =>
         el.addEventListener(ev, e => e.stopPropagation(), { passive: true })
       );
@@ -82,7 +81,7 @@
           wake = await navigator.wakeLock.request('screen');
           wake.addEventListener('release', () => { wake = null; });
         }
-      } catch (e) { /* sem suporte: segue normal */ }
+      } catch (e) { }
     }
 
     function soltarTelaLigada() {
@@ -115,15 +114,14 @@
       cook.querySelector('.cook-voltar').addEventListener('click', () => {
         if (idx > 0) { 
           idx--; 
-          // Garante que o botão "Próximo" volte ao normal se estiver vendo a foto
           const btnProximo = cook.querySelector('.cook-proximo');
           if (btnProximo.textContent === 'Concluir') {
             const novoBtn = btnProximo.cloneNode(true);
             btnProximo.replaceWith(novoBtn);
             novoBtn.addEventListener('click', avancarCook);
           }
-          cook.querySelector('.cook-voltar').style.display = ''; // Mostra o voltar
-          cook.querySelector('.cook-passo').innerHTML = '<span></span>'; // Limpa a imagem
+          cook.querySelector('.cook-voltar').style.display = '';
+          cook.querySelector('.cook-passo').innerHTML = '<span></span>';
           desenharCook(); 
         }
       });
@@ -156,49 +154,36 @@
     }
 
     function mostrarFoto() {
-      const titulo = cook.querySelector('.cook-titulo').textContent;
-      let seed = 0;
-      for (const c of String(titulo)) seed = (seed * 31 + c.charCodeAt(0)) % 100000;
-      const prompt = `${titulo}, photorealistic food photography, 45 degree angle, 50mm lens, shallow depth of field, soft natural window light, white ceramic plate, restaurant quality, highly detailed, sharp focus, no text, no letters, no words, no logo, no label, no packaging, no brand name, unbranded`;
-      const url = `https://meuchef-theta.vercel.app/api/foto?prompt=${encodeURIComponent(prompt)}`;
-
-      // Atualiza a interface para "Carregando"
-      cook.querySelector('.cook-contador').textContent = 'Preparando a foto...';
+      const imgOriginal = document.querySelector('#resultado .foto-receita, #conteudoReceitaFavorito .foto-receita');
+      
+      cook.querySelector('.cook-contador').textContent = 'Bom apetite! 🍽️';
       cook.querySelector('.cook-barra').style.width = '100%';
       cook.querySelector('.cook-voltar').style.display = 'none';
 
-      const carregarEFechar = (src) => {
+      const alvo = cook.querySelector('.cook-passo');
+      alvo.innerHTML = '';
+
+      if (imgOriginal && imgOriginal.src) {
         const img = document.createElement('img');
+        img.src = imgOriginal.src;
         img.style.maxWidth = '100%';
         img.style.maxHeight = '100%';
         img.style.objectFit = 'contain';
         img.style.borderRadius = '14px';
-        img.src = src;
-        
-        const alvo = cook.querySelector('.cook-passo');
-        alvo.innerHTML = '';
         alvo.appendChild(img);
-        
-        cook.querySelector('.cook-contador').textContent = 'Bom apetite!';
-        
-        const btn = cook.querySelector('.cook-proximo');
-        btn.textContent = 'Concluir';
-        btn.disabled = false;
-        
-        const novoBtn = btn.cloneNode(true);
-        btn.replaceWith(novoBtn);
-        novoBtn.addEventListener('click', fecharCook);
-      };
-
-      if (typeof FotoDB !== 'undefined') {
-        FotoDB.obter(url).then(blob => {
-          carregarEFechar(blob ? URL.createObjectURL(blob) : url);
-        }).catch(() => {
-          carregarEFechar(url);
-        });
       } else {
-        carregarEFechar(url);
+        const avisoImg = document.createElement('span');
+        avisoImg.textContent = 'Foto não disponível.';
+        alvo.appendChild(avisoImg);
       }
+
+      const btn = cook.querySelector('.cook-proximo');
+      btn.textContent = 'Concluir';
+      btn.disabled = false;
+      
+      const novoBtn = btn.cloneNode(true);
+      btn.replaceWith(novoBtn);
+      novoBtn.addEventListener('click', fecharCook);
     }
 
     function abrirCook(receita) {
