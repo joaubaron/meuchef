@@ -1,69 +1,69 @@
 const CACHE_VERSION = '12.11.2026-0816';
 const CACHE_NAME = `meuchef-${CACHE_VERSION}`;
 const urlsToCache = [
-  '/meuchef/',
-  '/meuchef/index.html',
-  '/meuchef/manifest.json',
-  '/meuchef/css/style.css',
-  '/meuchef/components/script.js',
-  '/meuchef/imagens/topo.png',
-  '/meuchef/imagens/assbaron.png',
-  '/meuchef/imagens/icon-192.png',
-  '/meuchef/imagens/icon-512.png' 
+'/meuchef/',
+'/meuchef/index.html',
+'/meuchef/manifest.json',
+'/meuchef/css/style.css',
+'/meuchef/components/script.js',
+'/meuchef/imagens/topo.png',
+'/meuchef/imagens/assbaron.png',
+'/meuchef/imagens/icon-192.png',
+'/meuchef/imagens/icon-512.png' 
 ];
 // Instalação do Service Worker
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return Promise.all(
-        urlsToCache.map(url =>
-          cache.add(url).catch(err => console.warn('Cache skip:', url, err))
-        )
-      );
-    }).then(() => self.skipWaiting())
-  );
+event.waitUntil(
+caches.open(CACHE_NAME).then(cache => {
+return Promise.all(
+urlsToCache.map(url =>
+cache.add(url).catch(err => console.warn('Cache skip:', url, err))
+)
+);
+}).then(() => self.skipWaiting())
+);
 });
 // Interceptação de requisições
 self.addEventListener('fetch', event => {
-  // Ignora completamente requisições que não sejam GET (ex: POST para o proxy Groq/Vercel).
-  // O Cache API só suporta GET; tentar cachear POST gera erro.
-  if (event.request.method !== 'GET') return;
+// Ignora completamente requisições que não sejam GET (ex: POST para o proxy Groq/Vercel).
+// O Cache API só suporta GET; tentar cachear POST gera erro.
+if (event.request.method !== 'GET') return;
 
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) return response;
-        return fetch(event.request).then(response => {
-          // Não cache requisições da API
-          if (event.request.url.includes('api.anthropic.com') || event.request.url.includes('api.groq.com') || event.request.url.includes('vercel.app')) return response;
-          // Cache outros recursos estáticos
-          if (response && response.status === 200) {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-          }
-          return response;
-        }).catch(() => {
-          // Fallback offline
-          if (event.request.mode === 'navigate') {
-            return caches.match('/meuchef/index.html');
-          }
-        });
-      })
-  );
+event.respondWith(
+caches.match(event.request)
+.then(response => {
+if (response) return response;
+return fetch(event.request).then(response => {
+// Não cache requisições da API
+if (event.request.url.includes('api.anthropic.com') || event.request.url.includes('api.groq.com') || event.request.url.includes('vercel.app')) return response;
+// Cache outros recursos estáticos
+if (response && response.status === 200) {
+const responseToCache = response.clone();
+caches.open(CACHE_NAME).then(cache => {
+cache.put(event.request, responseToCache);
+});
+}
+return response;
+}).catch(() => {
+// Fallback offline
+if (event.request.mode === 'navigate') {
+return caches.match('/meuchef/index.html');
+}
+});
+})
+);
 });
 // Limpeza de caches antigos + ativação imediata
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
-  );
+event.waitUntil(
+caches.keys().then(cacheNames => {
+return Promise.all(
+cacheNames.map(cacheName => {
+if (cacheName !== CACHE_NAME) {
+return caches.delete(cacheName);
+}
+})
+);
+}).then(() => self.clients.claim())
+);
 });
