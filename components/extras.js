@@ -327,7 +327,7 @@
         '<div class="cook-topo"><span class="cook-titulo">🧺 Lista de compras</span>' +
         '<button type="button" class="cook-fechar">✕ Fechar</button></div>' +
         '<div class="compras-sub"></div>' +
-        '<div class="compras-dica">Marque o que você já tem.</div>' +
+        '<div class="compras-dica">Marque o que você já tem</div>' +
         '<div class="compras-itens"></div>' +
         '<div class="cook-nav"><button type="button" class="compras-compartilhar">🔗 Compartilhar ingredientes</button></div>'
       );
