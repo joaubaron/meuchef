@@ -93,26 +93,51 @@
       if (!document.hidden && cookAberto && !wake) pedirTelaLigada();
     });
 
+    // ---------- Estilo do botão/painel de ingredientes (dentro do Modo Cozinhar) ----------
+    function injetarEstiloCook() {
+      if (document.getElementById('cookIngrEstilo')) return;
+      const s = document.createElement('style');
+      s.id = 'cookIngrEstilo';
+      s.textContent =
+        '.cook-ingr-linha{text-align:center;margin:6px 0}' +
+        '.cook-ingr{font-size:16px;padding:8px 16px;border-radius:20px;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;cursor:pointer}' +
+        '.cook-ingr-painel{position:fixed;top:0;left:0;right:0;bottom:0;z-index:5;background:#fff;color:#333;display:none;flex-direction:column;padding:16px;box-sizing:border-box}' +
+        '.cook-ingr-topo{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:20px;font-weight:bold}' +
+        '.cook-ingr-fechar{font-size:16px;padding:8px 14px;border-radius:10px;border:1px solid #ccc;background:#f5f5f5;color:#333;cursor:pointer}' +
+        '.cook-ingr-lista{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}' +
+        '.cook-ingr-item{font-size:20px;line-height:1.4;padding:10px 4px;border-bottom:1px solid #eee}';
+      document.head.appendChild(s);
+    }
+
     // ---------- MODO COZINHAR ----------
     let cook = null;
     let passos = [];
     let idx = 0;
     let cookCaixa = null;
     let cookFotoUrl = null;
+    let cookIngredientes = [];
 
     function montarCook() {
       if (cook) return;
+      injetarEstiloCook();
       cook = criarOverlay('modoCozinhar',
         '<div class="cook-topo"><span class="cook-titulo"></span>' +
         '<button type="button" class="cook-fechar">✕ Fechar</button></div>' +
         '<div class="cook-progresso"><div class="cook-barra"></div></div>' +
         '<div class="cook-contador"></div>' +
+        '<div class="cook-ingr-linha"><button type="button" class="cook-ingr">🧺 Ingredientes</button></div>' +
         '<div class="cook-passo"><span></span></div>' +
         '<div class="cook-nav">' +
         '<button type="button" class="cook-voltar">← Voltar</button>' +
-        '<button type="button" class="cook-proximo">Próximo →</button></div>'
+        '<button type="button" class="cook-proximo">Próximo →</button></div>' +
+        '<div class="cook-ingr-painel">' +
+        '<div class="cook-ingr-topo"><span>🧺 Ingredientes</span>' +
+        '<button type="button" class="cook-ingr-fechar">✕ Fechar</button></div>' +
+        '<div class="cook-ingr-lista"></div></div>'
       );
       cook.querySelector('.cook-fechar').addEventListener('click', fecharCook);
+      cook.querySelector('.cook-ingr').addEventListener('click', abrirIngredientesCook);
+      cook.querySelector('.cook-ingr-fechar').addEventListener('click', fecharIngredientesCook);
       cook.querySelector('.cook-voltar').addEventListener('click', () => {
         if (idx > 0) { 
           idx--; 
@@ -128,6 +153,25 @@
         }
       });
       cook.querySelector('.cook-proximo').addEventListener('click', avancarCook);
+    }
+
+    function abrirIngredientesCook() {
+      if (!cook) return;
+      const lista = cook.querySelector('.cook-ingr-lista');
+      lista.textContent = '';
+      cookIngredientes.forEach(item => {
+        const linha = document.createElement('div');
+        linha.className = 'cook-ingr-item';
+        linha.textContent = item;
+        lista.appendChild(linha);
+      });
+      lista.scrollTop = 0;
+      cook.querySelector('.cook-ingr-painel').style.display = 'flex';
+    }
+
+    function fecharIngredientesCook() {
+      if (!cook) return;
+      cook.querySelector('.cook-ingr-painel').style.display = 'none';
     }
 
     function avancarCook() {
@@ -236,10 +280,12 @@
       montarCook();
       cookCaixa = caixa || null;
       passos = receita.passos;
+      cookIngredientes = receita.ingredientes || [];
       idx = 0;
       cook.querySelector('.cook-titulo').textContent = receita.titulo;
       cook.querySelector('.cook-voltar').style.display = '';
       cook.querySelector('.cook-passo').innerHTML = '<span></span>';
+      fecharIngredientesCook();
       
       const btn = cook.querySelector('.cook-proximo');
       if (btn.textContent === 'Concluir') {
@@ -255,6 +301,7 @@
     }
 
     function fecharCook() {
+      fecharIngredientesCook();
       if (cook) cook.classList.add('oculto');
       cookAberto = false;
       soltarTelaLigada();
