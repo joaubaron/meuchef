@@ -1565,21 +1565,22 @@ button:focus-visible, .tag:focus-visible, .item-favorito:focus-visible, a:focus-
 #conteudoReceitaFavorito .botoes-receita {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 #conteudoReceitaFavorito .botoes-receita button {
   font-size: 12px !important;
-  padding: 8px 12px;
+  padding: 8px 10px;
   gap: 4px;
   white-space: nowrap;
   flex: 1 1 auto;
-  min-width: max-content;
+  min-width: 30%;
+  justify-content: center;
 }
 
 @media (max-width: 360px) {
   #conteudoReceitaFavorito .botoes-receita button {
     font-size: 11px !important;
-    padding: 8px 8px;
+    padding: 8px 6px;
   }
 }
