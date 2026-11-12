@@ -324,7 +324,7 @@
     function montarCompras() {
       if (compras) return;
       compras = criarOverlay('listaCompras',
-        '<div class="cook-topo"><span class="cook-titulo">🛒 Lista de compras</span>' +
+        '<div class="cook-topo"><span class="cook-titulo">🧺 Lista de compras</span>' +
         '<button type="button" class="cook-fechar">✕ Fechar</button></div>' +
         '<div class="compras-sub"></div>' +
         '<div class="compras-dica">Marque o que você já tem.</div>' +
@@ -381,7 +381,7 @@
         aviso('Você já tem tudo! 🎉');
         return;
       }
-      const texto = '🧺 Compras: ' + comprasTitulo + '\n\n' + faltam.join('\n');
+      const texto = '🛒 Compras: ' + comprasTitulo + '\n\n' + faltam.join('\n');
       compartilharTexto('Lista de compras', texto);
     }
 
