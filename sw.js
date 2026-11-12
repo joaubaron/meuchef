@@ -1,4 +1,4 @@
-const CACHE_VERSION = '12.11.2026-0837';
+const CACHE_VERSION = '12.11.2026-0840';
 const CACHE_NAME = `meuchef-${CACHE_VERSION}`;
 const urlsToCache = [
 '/meuchef/',
@@ -6,6 +6,7 @@ const urlsToCache = [
 '/meuchef/manifest.json',
 '/meuchef/css/style.css',
 '/meuchef/components/script.js',
+'/meuchef/components/extras.js',
 '/meuchef/imagens/topo.png',
 '/meuchef/imagens/assbaron.png',
 '/meuchef/imagens/icon-192.png',
