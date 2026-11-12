@@ -381,7 +381,7 @@
         aviso('Você já tem tudo! 🎉');
         return;
       }
-      const texto = '🛒 Compras: ' + comprasTitulo + '\n\n' + faltam.join('\n');
+      const texto = '🧺 Compras: ' + comprasTitulo + '\n\n' + faltam.join('\n');
       compartilharTexto('Lista de compras', texto);
     }
 
