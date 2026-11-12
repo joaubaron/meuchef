@@ -1026,8 +1026,10 @@ button:disabled { opacity: 0.7; cursor: default; }
 
 #btn-confirmar-renomear,
 #btn-confirmar-mudanca,
+#btn-confirmar-exclusao,
 #btn-confirmar-renomear:active,
-#btn-confirmar-mudanca:active {
+#btn-confirmar-mudanca:active,
+#btn-confirmar-exclusao:active {
   box-shadow: none !important;
 }
 
