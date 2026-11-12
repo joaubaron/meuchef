@@ -1549,3 +1549,25 @@ button:focus-visible, .tag:focus-visible, .item-favorito:focus-visible, a:focus-
   font-size: 15px;
   padding: 40px 20px;
 }
+
+/* Botões da receita favorita: 3 colunas, 3 linhas */
+#conteudoReceitaFavorito .botoes-receita {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+#conteudoReceitaFavorito .botoes-receita button {
+  font-size: 12px !important;
+  padding: 8px 4px;
+  gap: 4px;
+  white-space: nowrap;
+  width: 100%;
+}
+
+@media (max-width: 360px) {
+  #conteudoReceitaFavorito .botoes-receita button {
+    font-size: 11px !important;
+    padding: 8px 2px;
+  }
+}
