@@ -1428,12 +1428,12 @@ const conteudoFormatado = formatarReceitaParaExibicao(receita.conteudo);
 const receitaFormatadaHTML = `
 <div class="recipe-box">
 <div class="botoes-receita">
-<button onclick="compartilharFavoritoAtual()" class="botao-padrao">🔗 Compartilhar receita</button>
 <button onclick="voltarParaListaFavoritos()" class="botao-padrao">📋 Favoritos</button>
-<button onclick="renomearFavorito()" class="botao-padrao">✏️ Renomear</button>
-<button onclick="mudarCategoriaFavorito()" class="botao-padrao">🏷️ Mudar</button>
-<button onclick="fecharModalFavoritos()" class="botao-padrao">🛒 Cozinha</button>
 <button onclick="excluirFavoritoAtual()" class="botao-excluir">🗑️ Excluir</button>
+<button onclick="mudarCategoriaFavorito()" class="botao-padrao">🏷️ Mudar</button>
+<button onclick="compartilharFavoritoAtual()" class="botao-padrao">🔗 Compartilhar receita</button>
+<button onclick="renomearFavorito()" class="botao-padrao">✏️ Renomear</button>
+<button onclick="fecharModalFavoritos()" class="botao-padrao">🛒 Cozinha</button>
 </div>
 ${conteudoFormatado}
 <div class="bom-apetite">
