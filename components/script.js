@@ -1166,28 +1166,6 @@ conteudoReceita.innerHTML = '';
 receitaCompleta.classList.add('oculto');
 listaTitulos.classList.remove('oculto');
 
-// --- CORREÇÃO: Manter a última categoria aberta ao voltar ---
-let categoriaAberta = '';
-const listaExistente = document.getElementById('listaReceitasFiltradas');
-if (listaExistente) {
-const aberta = listaExistente.querySelector('.receitas-categoria:not(.oculto)');
-if (aberta) {
-// Pega o id da categoria a partir do título (ex: "🥗 Jantar (2)")
-const tituloEl = aberta.previousElementSibling;
-if (tituloEl && tituloEl.classList.contains('categoria-titulo')) {
-const texto = tituloEl.textContent.trim();
-const match = texto.match(/^(\S+)\s/); // Pega o emoji ou primeira palavra
-if (match) {
-// Encontra a categoria pelo nome
-const nomeCat = texto.replace(match[1], '').split('(')[0].trim();
-const cat = categoriasPredefinidas.find(c => c.nome === nomeCat);
-if (cat) categoriaAberta = cat.id;
-}
-}
-}
-}
-// -----------------------------------------------------------
-
 listaTitulos.innerHTML = `
 <div class="busca-categorias-container">
 <div class="busca-filtro-row">
@@ -1214,14 +1192,6 @@ ${categoriasPredefinidas.map(cat => `<option value="${cat.id}">${cat.emoji} ${ca
 `;
 
 modal.classList.remove('oculto');
-
-// Aplica a categoria aberta antes de filtrar
-if (categoriaAberta) {
-const select = document.getElementById('filtroCategoria');
-if (select) {
-select.value = categoriaAberta;
-}
-}
 
 filtrarFavoritos();
 
