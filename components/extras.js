@@ -105,7 +105,10 @@
         '.cook-ingr-topo{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:20px;font-weight:bold}' +
         '.cook-ingr-fechar{font-size:16px;padding:8px 14px;border-radius:10px;border:1px solid #ccc;background:#f5f5f5;color:#333;cursor:pointer}' +
         '.cook-ingr-lista{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}' +
-        '.cook-ingr-item{font-size:20px;line-height:1.4;padding:10px 4px;border-bottom:1px solid #eee}';
+        '.cook-ingr-item{font-size:20px;line-height:1.4;padding:10px 4px;border-bottom:1px solid #eee}' +
+        // Container da foto no modo cozinhar: centraliza sem quebrar o formato
+        '.cook-foto-wrap{display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:8px;box-sizing:border-box}' +
+        '.cook-foto-wrap .foto-receita{margin:0;max-height:100%;width:100%;}';
       document.head.appendChild(s);
     }
 
@@ -254,13 +257,20 @@
       alvo.innerHTML = '';
 
       if (src) {
+        // Container centralizado (não estoura a tela e não quebra o formato)
+        const wrap = document.createElement('div');
+        wrap.className = 'cook-foto-wrap';
+
         const img = document.createElement('img');
         img.src = src;
-        img.style.maxWidth = '100%';
+        // Usa a MESMA classe da receita: border-radius, shadow, aspect-ratio 3/2 e object-fit cover
+        img.className = 'foto-receita';
+        img.alt = 'Foto da receita';
+        // Só limita a altura para caber no modo cozinhar (o resto vem do CSS)
         img.style.maxHeight = '100%';
-        img.style.objectFit = 'contain';
-        img.style.borderRadius = '14px';
-        alvo.appendChild(img);
+
+        wrap.appendChild(img);
+        alvo.appendChild(wrap);
       } else {
         const avisoImg = document.createElement('span');
         avisoImg.textContent = 'Foto não disponível.';
