@@ -263,14 +263,44 @@
       if (!botoes || botoes.querySelector('.btn-extra')) return;
 
       const excluir = botoes.querySelector('.botao-excluir');
-      [['cozinhar', '🍳 Cozinhar'], ['compras', '🛒 Compras']].forEach(par => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'botao-padrao btn-extra';
-        b.textContent = par[1];
-        b.addEventListener('click', () => tratarAcao(par[0], caixa));
-        botoes.insertBefore(b, excluir); // Excluir continua por último
+
+      // Cria o container para agrupar os 3 botões
+      const grupoExtras = document.createElement('div');
+      grupoExtras.style.display = 'flex';
+      grupoExtras.style.gap = '8px';
+      grupoExtras.style.flexWrap = 'wrap'; 
+      grupoExtras.style.justifyContent = 'center';
+
+      // Botão Cozinhar
+      const btnCozinhar = document.createElement('button');
+      btnCozinhar.type = 'button';
+      btnCozinhar.className = 'botao-padrao btn-extra';
+      btnCozinhar.textContent = '🍳 Cozinhar';
+      btnCozinhar.addEventListener('click', () => tratarAcao('cozinhar', caixa));
+
+      // Botão Compras
+      const btnCompras = document.createElement('button');
+      btnCompras.type = 'button';
+      btnCompras.className = 'botao-padrao btn-extra';
+      btnCompras.textContent = '🛒 Compras';
+      btnCompras.addEventListener('click', () => tratarAcao('compras', caixa));
+
+      // Botão Cozinha (movido do script.js)
+      const btnCozinha = document.createElement('button');
+      btnCozinha.type = 'button';
+      btnCozinha.className = 'botao-padrao btn-extra';
+      btnCozinha.textContent = '🛒 Cozinha';
+      btnCozinha.addEventListener('click', () => {
+        if (typeof fecharModalFavoritos === 'function') fecharModalFavoritos();
       });
+
+      // Adiciona todos ao grupo
+      grupoExtras.appendChild(btnCozinhar);
+      grupoExtras.appendChild(btnCompras);
+      grupoExtras.appendChild(btnCozinha);
+
+      // Insere o grupo inteiro antes do Excluir
+      botoes.insertBefore(grupoExtras, excluir);
     }
 
     // ---------- RECENTES (últimas 10 receitas geradas) ----------
