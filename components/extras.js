@@ -97,6 +97,8 @@
     let cook = null;
     let passos = [];
     let idx = 0;
+    let cookCaixa = null;
+    let cookFotoUrl = null;
 
     function montarCook() {
       if (cook) return;
@@ -153,9 +155,53 @@
       cook.querySelector('.cook-proximo').textContent = (idx === passos.length - 1) ? 'Ver foto 🍽️' : 'Próximo →';
     }
 
-    function mostrarFoto() {
-      const imgOriginal = document.querySelector('#resultado .foto-receita, #conteudoReceitaFavorito .foto-receita');
-      
+    // Foto do favorito: vem do IndexedDB (sem gastar cota).
+    // Receita recém-gerada: copia a imagem que já está carregada na tela.
+    async function obterFotoCook() {
+      if (cookFotoUrl) {
+        try { URL.revokeObjectURL(cookFotoUrl); } catch (e) {}
+        cookFotoUrl = null;
+      }
+      const caixa = cookCaixa;
+      if (!caixa) return null;
+
+      if (caixa.closest('#conteudoReceitaFavorito') &&
+          typeof FotoDB !== 'undefined' &&
+          typeof AppState !== 'undefined' &&
+          typeof urlFotoDoFavorito === 'function') {
+        try {
+          const rec = AppState.receitasFavoritas[AppState.indiceFavoritoAtual];
+          if (rec) {
+            const blob = await FotoDB.obter(urlFotoDoFavorito(rec));
+            if (blob) {
+              cookFotoUrl = URL.createObjectURL(blob);
+              return cookFotoUrl;
+            }
+          }
+        } catch (e) {}
+      }
+
+      const img = caixa.querySelector('.foto-receita');
+      if (img && img.complete && img.naturalWidth > 0) {
+        try {
+          const c = document.createElement('canvas');
+          c.width = img.naturalWidth;
+          c.height = img.naturalHeight;
+          c.getContext('2d').drawImage(img, 0, 0);
+          return c.toDataURL('image/jpeg', 0.9);
+        } catch (e) {}
+        return img.src;
+      }
+      return null;
+    }
+
+    async function mostrarFoto() {
+      const btnAntes = cook.querySelector('.cook-proximo');
+      btnAntes.disabled = true;
+
+      const src = await obterFotoCook();
+      if (!cookAberto) return;
+
       cook.querySelector('.cook-contador').textContent = 'Bom apetite! 🍽️';
       cook.querySelector('.cook-barra').style.width = '100%';
       cook.querySelector('.cook-voltar').style.display = 'none';
@@ -163,9 +209,9 @@
       const alvo = cook.querySelector('.cook-passo');
       alvo.innerHTML = '';
 
-      if (imgOriginal && imgOriginal.src) {
+      if (src) {
         const img = document.createElement('img');
-        img.src = imgOriginal.src;
+        img.src = src;
         img.style.maxWidth = '100%';
         img.style.maxHeight = '100%';
         img.style.objectFit = 'contain';
@@ -180,14 +226,15 @@
       const btn = cook.querySelector('.cook-proximo');
       btn.textContent = 'Concluir';
       btn.disabled = false;
-      
+
       const novoBtn = btn.cloneNode(true);
       btn.replaceWith(novoBtn);
       novoBtn.addEventListener('click', fecharCook);
     }
 
-    function abrirCook(receita) {
+    function abrirCook(receita, caixa) {
       montarCook();
+      cookCaixa = caixa || null;
       passos = receita.passos;
       idx = 0;
       cook.querySelector('.cook-titulo').textContent = receita.titulo;
@@ -286,7 +333,7 @@
       const receita = lerReceita(caixa);
       if (acao === 'cozinhar') {
         if (!receita.passos.length) { aviso('Esta receita não tem passos.'); return; }
-        abrirCook(receita);
+        abrirCook(receita, caixa);
       } else {
         if (!receita.ingredientes.length) { aviso('Esta receita não tem ingredientes.'); return; }
         abrirCompras(receita);
