@@ -258,7 +258,7 @@
     }
 
     // ---------- Botões na receita favorita ----------
-    function injetarFavorito() {
+        function injetarFavorito() {
       const caixa = document.querySelector('#conteudoReceitaFavorito .recipe-box');
       const botoes = caixa && caixa.querySelector('.botoes-receita');
       if (!botoes) return;
@@ -266,9 +266,10 @@
       // Se já injetou os novos, não faz de novo
       if (document.getElementById('btn-extra-compras')) return;
 
-      // Esconde os botões antigos do script.js e remove a classe para não ocupar espaço
+      // Esconde os botões antigos do script.js (apenas os que ativavam as ações, se existirem)
       botoes.querySelectorAll('button').forEach(b => {
-        if (b.textContent.includes('Compras') || b.textContent.includes('Cozinha')) {
+        // Aqui a gente garante que NÃO vai esconder o botão "Cozinha" de fechar o modal
+        if (b.textContent.includes('Compras') || (b.textContent.includes('Cozinhar') && !b.textContent.includes('Cozinha'))) {
           b.style.setProperty('display', 'none', 'important');
         }
       });
