@@ -105,10 +105,10 @@ setTimeout(() => URL.revokeObjectURL(url), 1000);
 
 // Única mensagem: fica na tela até você tocar em Ok. Só depois abre a tela de salvar.
 const modal = ModalManager.open({
-title: '✅ Backup pronto',
+title: 'Backup pronto',
 content:
-'<p class="modal-subtitulo">📷 ' + totalFotos + ' foto(s) · ' + dados.totalReceitas + ' receita(s)</p>' +
-'<p>Toque em Ok para salvar o arquivo.</p>',
+'<p class="modal-subtitulo">' + totalFotos + ' foto(s) - ' + dados.totalReceitas + ' receita(s)</p>' +
+'<p>Toque em Ok para salvar o arquivo</p>',
 actions: '<button id="btn-backup-ok" class="btn-confirmar-novo">Ok</button>'
 });
 
@@ -150,7 +150,7 @@ if (restauradas) {
 const mostrarOriginal = window.showCustomModal;
 window.showCustomModal = function (msg) {
 window.showCustomModal = mostrarOriginal;
-mostrarOriginal(msg + '<br>📷 ' + restauradas + ' foto(s) de volta');
+mostrarOriginal(msg + '<br>' + restauradas + ' foto(s) de volta');
 };
 setTimeout(() => {
 if (window.showCustomModal !== mostrarOriginal) window.showCustomModal = mostrarOriginal;
