@@ -52,7 +52,6 @@ return;
 }
 
 migrarReceitasAntigas();
-showCustomModal('📷 Preparando seu backup...');
 
 // Uma foto por favorito (se duas receitas usam a mesma foto, guarda uma vez só)
 const fotos = {};
@@ -93,6 +92,7 @@ fotos: fotos
 };
 
 const blob = new Blob([JSON.stringify(dados)], { type: 'application/json' });
+const baixar = () => {
 const url = URL.createObjectURL(blob);
 const a = document.createElement('a');
 a.href = url;
@@ -101,8 +101,23 @@ document.body.appendChild(a);
 a.click();
 document.body.removeChild(a);
 setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
 
-showCustomModal('✅ Backup salvo: ' + fileName + (totalFotos ? '<br>📷 ' + totalFotos + ' foto(s)' : '<br>Sem fotos guardadas ainda'));
+// Única mensagem: fica na tela até você tocar em Ok. Só depois abre a tela de salvar.
+const modal = ModalManager.open({
+title: '✅ Backup pronto',
+content:
+'<p class="modal-subtitulo">📷 ' + totalFotos + ' foto(s) · ' + dados.totalReceitas + ' receita(s)</p>' +
+'<p>Toque em Ok para salvar o arquivo.</p>',
+actions: '<button id="btn-backup-ok" class="btn-confirmar-novo">Ok</button>'
+});
+
+if (!modal) { baixar(); return; }
+
+document.getElementById('btn-backup-ok').addEventListener('click', () => {
+ModalManager.close(modal);
+baixar();
+});
 } catch (erro) {
 console.warn('Backup com fotos falhou, usando o exportar antigo:', erro);
 exportarOriginal();
