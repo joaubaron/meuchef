@@ -7,6 +7,7 @@ const urlsToCache = [
 '/meuchef/css/style.css',
 '/meuchef/components/script.js',
 '/meuchef/components/extras.js',
+'/meuchef/components/timer.js',
 '/meuchef/imagens/topo.png',
 '/meuchef/imagens/assbaron.png',
 '/meuchef/imagens/icon-192.png',
