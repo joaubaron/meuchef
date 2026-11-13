@@ -88,6 +88,7 @@ ultimaEntrada: "",
 ultimaReceitaGerada: "",
 isGenerating: false,
 ultimoTipoPratoGerado: "comida",
+ultimaCategoriaIA: "",
 gerarComoNova: false,
 modalAberto: false
 };
@@ -119,6 +120,15 @@ return texto
 .toLowerCase()
 .normalize("NFD")
 .replace(/[\u0300-\u036f]/g, "");
+};
+
+// Procura palavra inteira (aceita plural simples), sem casar pedaço de outra palavra
+const contemPalavra = (texto, palavras) => {
+const tokens = normalizarTexto(String(texto || '')).split(/[^a-z0-9]+/);
+return palavras.some(p => {
+const alvo = normalizarTexto(p);
+return tokens.some(t => t === alvo || t === alvo + 's');
+});
 };
 
 const extrairQuantidadePessoas = texto => {
@@ -716,6 +726,17 @@ return categoriaMaisProvavel;
 // === INSTÂNCIAS GLOBAIS ===
 const categoryPredictor = new CategoryPredictor();
 
+// Tipo do prato vem do campo "categoria" que a própria IA devolveu.
+// Fallback: só o que o usuário digitou (nunca o JSON inteiro).
+function tipoPratoDaReceita(receitaJson, entrada) {
+const validas = ['almoco','cafe','jantar','lanche','doce','drink','especial','petiscos','restricoes','diversos'];
+try {
+const r = JSON.parse(receitaJson);
+if (validas.includes(r.categoria)) return r.categoria;
+} catch (e) {}
+return sugerirCategoria("", "", entrada);
+}
+
 // === API SERVICE ===
 const fetchComRetry = async (url, options, maxTentativas = CONFIG.MAX_RETRIES) => {
 for (let tentativa = 1; tentativa <= maxTentativas; tentativa++) {
@@ -765,14 +786,13 @@ tipoPrato = String(tipoPrato || "comida");
 
 const palavrasBebida = ["bebida", "drink", "coquetel", "caipirinha", "suco", "vitamina",
 "batida", "cachaça", "vodka", "gin", "rum", "tequila", "cerveja", "vinho"];
-if (palavrasBebida.some(p => ingredientes.toLowerCase().includes(p))) tipoPrato = "drink";
-
+if (contemPalavra(ingredientes, palavrasBebida)) tipoPrato = "drink";
 const rendimento = quantidadePessoas === 1 ? "1 porção" : `${quantidadePessoas} porções`;
 
 return `Pedido: "${ingredientes}"
 Tipo de prato: ${tipoPrato}
 ${alternativa
-? 'Gere APENAS uma VARIAÇÃO do prato (pequenas trocas de tempero/técnica ou 1-2 ingredientes compatíveis), sem mudar o tipo principal.'
+? 'Gere APENAS uma VARIAÇÃO do prato (pequenas trocas de tempero/técnica ou 1-2 ingredientes compatíveis), sem mudar o tipo principal. Comida continua comida e bebida continua bebida: não transforme o prato em smoothie, vitamina ou drink.'
 : 'Gere uma receita.'}
 
 Regras:
@@ -1048,7 +1068,7 @@ fav.titulo === titulo && fav.conteudo.replace(/\s+/g, ' ').trim() === conteudoNo
 );
 
 if (!jaExiste) {
-const categoriaSugerida = sugerirCategoria(titulo, receitaHTML);
+const categoriaSugerida = AppState.ultimaCategoriaIA || sugerirCategoria(titulo, '', '');
 mostrarModalCategoria(titulo, receitaHTML, categoriaSugerida);
 } else {
 showCustomModal('Esta receita já está nos favoritos!');
@@ -2001,8 +2021,7 @@ return;
 const palavrasChaveBebida = ['bebida', 'suco', 'chá', 'coquetel', 'drink', 'caipirinha', 'batida', 'vitamina', 
 'cachaça', 'vodka', 'gin', 'rum', 'tequila', 'cerveja', 'vinho', 'licor', 'refresco'];
 
-const entradaMinuscula = entrada.toLowerCase();
-const isBebida = palavrasChaveBebida.some(palavra => entradaMinuscula.includes(palavra));
+const isBebida = contemPalavra(entrada, palavrasChaveBebida);
 
 const tipoPratoInferido = isBebida ? "drink" : sugerirCategoria("", "", entrada);
 
@@ -2073,7 +2092,8 @@ const receita = await gerarReceitaComIA(promptParaIA, isAlternativa, tipoPratoPa
 console.log('Receita gerada com sucesso!');
 
 AppState.ultimaReceitaGerada = receita;
-AppState.ultimoTipoPratoGerado = sugerirCategoria(extrairTitulo(receita), receita, promptParaIA);
+AppState.ultimoTipoPratoGerado = tipoPratoDaReceita(receita, promptParaIA);
+AppState.ultimaCategoriaIA = AppState.ultimoTipoPratoGerado;
 
 resultadoDiv.innerHTML = RecipeFormatter.formatResponse(receita);
 
@@ -2142,7 +2162,8 @@ debugAPIResponse(receita);
 // --------------------
 
 AppState.ultimaReceitaGerada = receita;
-AppState.ultimoTipoPratoGerado = sugerirCategoria(extrairTitulo(receita), receita, entrada);
+AppState.ultimoTipoPratoGerado = tipoPratoDaReceita(receita, entrada);
+AppState.ultimaCategoriaIA = AppState.ultimoTipoPratoGerado;
 
 console.log('Receita gerada com sucesso!');
 
